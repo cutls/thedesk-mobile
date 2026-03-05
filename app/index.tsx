@@ -43,6 +43,9 @@ export default function Index() {
 		}
 		fn()
 	}, [current])
+	useEffect(() => {
+		if (composeAction?.type) setIsComposeOpened(true)
+	}, [composeAction])
 	return (
 		<View style={styles.container}>
 			<Columns context={{ current, setCurrent, relayRef, setComposeAction }} />
