@@ -218,7 +218,8 @@ export const Status = (props: IProps) => {
 					{status.quote_status && <Quote config={props.config} acctId={acct.id} status={status.quote_status} columnWidth={columnWidth - left} lang={lang} state={status.quote_status_state} />}
 					{status.card && <Card card={status.card} columnWidth={columnWidth - left} />}
 					<Attachment attachments={status.media_attachments} width={columnWidth - left} isSensitive={status.sensitive} config={props.config} />
-					<View style={{ display: 'flex', flexDirection: 'row', marginVertical: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
+					{status.poll || status.quote_status || status.card || status.media_attachments.length > 0 ? <View style={{ height: 10 }} /> : null}
+					<View style={{ display: 'flex', flexDirection: 'row', marginBottom: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
 						<TouchableOpacity style={styles.action} onPress={() => composeAction(client, acct, 'reply', status)}>
 							<SymbolView name="arrowshape.turn.up.left" type="monochrome" tintColor={txtColor} size={fontSize * 1.2} />
 							<Text style={{ marginLeft: 5 }}>{showCount ? status.replies_count.toLocaleString() : ''}</Text>

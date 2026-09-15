@@ -119,9 +119,6 @@ export default function Index() {
 				<Button onPress={() => router.push('/acct')} style={{ padding: 10 }} systemImage="person" width={width - 20} isDark={isDark}>
 					{t('screen.acct')}
 				</Button>
-				<Button onPress={() => router.push('/about')} style={{ padding: 10 }} systemImage="info.circle" width={width - 20} isDark={isDark}>
-					{t('screen.about')}
-				</Button>
 				<Text style={styles.sectionHeader}>{t('config.timeline.title')}</Text>
 
 				<GlassView style={styles.card}>
@@ -260,6 +257,10 @@ export default function Index() {
 						style={[staticStyles.input, styles.multiline, { color: isDark ? 'white' : 'black' }]}
 					/>
 				</GlassView>
+
+				<Button onPress={() => router.push('/about')} style={{ padding: 10 }} systemImage="info.circle" width={width - 20} isDark={isDark}>
+					{t('screen.about')}
+				</Button>
 			</KeyboardAwareScrollView>
 			<InputAccessoryView nativeID="templateSuggest">
 				<View style={{ backgroundColor: PlatformColor('systemBackground'), height: 40, width: '100%' }}>

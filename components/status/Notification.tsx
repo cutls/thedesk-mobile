@@ -45,13 +45,13 @@ const Banner = ({ acctId, type, who, txtColor }: { acctId: string; type: string;
 	const { t } = useTranslation()
 	const { width } = useWindowSize()
 	return (
-		<View style={{ padding: 5, paddingLeft: 10 }}>
+		<View style={{ paddingLeft: 10 }}>
 			<Link href={`/user?acctId=${acctId}&userId=${who?.id}`} push>
 				<Link.Preview style={{ backgroundColor: PlatformColor('systemBackground') }} />
 				<Link.Trigger>
 					<View style={{ flexDirection: 'row', marginTop: 5, marginLeft: 2, width: width - 10 }}>
 						<SymbolView name={icon(type)} type="monochrome" size={16} tintColor={txtColor} />
-						<Text style={{ marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
+						<Text numberOfLines={1} style={{ marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
 					</View>
 				</Link.Trigger>
 			</Link>

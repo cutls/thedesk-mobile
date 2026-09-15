@@ -22,7 +22,7 @@ const renderers = {
 export const RenderHTML = React.memo(({ status, fontSize, showGif, txtColor, columnWidth, left, handleLink }: RenderHTMLProps) => (
 	<HTML
 		source={{ html: `${emojify(status.content, status.emojis, fontSize * 0.8, showGif)}` }}
-		tagsStyles={{ p: { color: txtColor }, a: { color: PlatformColor('link') } }}
+		tagsStyles={{ p: { color: txtColor, marginBottom: 15 }, a: { color: PlatformColor('link') } }}
 		customHTMLElementModels={renderers}
 		contentWidth={columnWidth - left}
 		classesStyles={{
