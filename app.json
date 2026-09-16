@@ -2,7 +2,6 @@
   "expo": {
     "name": "TheDesk",
     "slug": "TootDesk",
-    "jsEngine": "hermes",
     "version": "2.0.4",
     "ios": {
       "buildNumber": "104",
@@ -16,8 +15,10 @@
     "icon": "./assets/images/desk.png",
     "scheme": "tootdesk",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "locales": { "en": "./locales/bundle/en.json", "ja": "./locales/bundle/ja.json" },
+    "locales": {
+      "en": "./locales/bundle/en.json",
+      "ja": "./locales/bundle/ja.json"
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -25,7 +26,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "top.thedesk.toot"
     },
@@ -48,7 +48,12 @@
         }
       ],
       "expo-localization",
-      "expo-sqlite"
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

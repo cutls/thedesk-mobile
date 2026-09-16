@@ -31,8 +31,8 @@ export default function About() {
 			<Text style={styles.title}>@expo/vector-icons</Text>
 			<MIT author="Copyright (c) 2015 Joel Arvidsson" />
 			<Text style={styles.title}>@gorhom/bottom-sheet</Text>
-			<MIT author="Copyright (c) 2020 Mo Gorhom" />
-			<Text style={styles.title}>@nandorojo/galeria</Text>
+			<MIT author="Copyright (c) 2026 cutls, 2020 Mo Gorhom" />
+			<Text style={styles.title}>@cutls/galeria</Text>
 			<MIT author="Copyright (c) 2025 Fernando Rojo" />
 			<Text style={styles.title}>@react-native-community/datetimepicker</Text>
 			<MIT author="Copyright (c) 2019 React Native Community" />

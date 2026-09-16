@@ -2,8 +2,8 @@ import { useWindowSize } from '@/hooks/useWindowSize'
 import { confirmDialog, CONTINUE } from '@/utils/alert'
 import type { IState } from '@/utils/type'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
-import { BottomSheet, Host } from '@expo/ui/swift-ui'
-import React, { useState } from 'react'
+import { BottomSheet, Host, Text as SwiftUIText } from '@expo/ui/swift-ui'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, PlatformColor, StyleSheet, View } from 'react-native'
 import { Text } from './themed/Text'
@@ -60,7 +60,7 @@ export default function RelationSheet({ isOpened, setIsOpened, client, relation,
 	}
 	return (
 		<Host style={{ width }}>
-			<BottomSheet isOpened={isOpened} onIsOpenedChange={(e) => setIsOpened(e)}>
+			<BottomSheet isPresented={isOpened} onIsPresentedChange={(e) => setIsOpened(e)}>
 				{isLoading ? (
 					<View style={{ padding: 20, alignItems: 'center' }}>
 						<ActivityIndicator />
@@ -73,10 +73,10 @@ export default function RelationSheet({ isOpened, setIsOpened, client, relation,
 								<View style={{ height: 10 }} />
 								<View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 									<CustomedButton variant="bordered" controlSize="large" onPress={() => action('request', true)} width={width / 2 + 10}>
-										{t('user.accept')}
+										<SwiftUIText>{t('user.accept')}</SwiftUIText>
 									</CustomedButton>
 									<CustomedButton variant="bordered" controlSize="large" onPress={() => action('request', false)} width={width / 2 + 10}>
-										{t('user.reject')}
+										<SwiftUIText>{t('user.reject')}</SwiftUIText>
 									</CustomedButton>
 								</View>
 
@@ -87,16 +87,16 @@ export default function RelationSheet({ isOpened, setIsOpened, client, relation,
 						{relation.followed_by && <Text>{t('user.followedBy')}</Text>}
 						<View style={{ height: 10 }} />
 						<CustomedButton variant="bordered" controlSize="large" onPress={() => action('follow', locked && relation.requested ? false : !following)}>
-							{following ? t('user.unfollow') : locked ? (relation.requested ? t('user.unrequest') : t('user.request')) : t('user.follow')}
+							<SwiftUIText>{following ? t('user.unfollow') : locked ? (relation.requested ? t('user.unrequest') : t('user.request')) : t('user.follow')}</SwiftUIText>
 						</CustomedButton>
 						<View style={{ height: 10 }} />
 						<View style={{ height: 10, borderTopWidth: 1, borderColor: PlatformColor('separator') }} />
 						<CustomedButton variant="bordered" controlSize="large" onPress={() => action('mute', !muting)}>
-							{muting ? t('user.unmute') : t('user.mute')}
+							<SwiftUIText>{muting ? t('user.unmute') : t('user.mute')}</SwiftUIText>
 						</CustomedButton>
 						<View style={{ height: 10 }} />
 						<CustomedButton variant="bordered" color="red" controlSize="large" onPress={() => action('block', !blocking)}>
-							{muting ? t('user.unblock') : t('user.block')}
+							<SwiftUIText>{muting ? t('user.unblock') : t('user.block')}</SwiftUIText>
 						</CustomedButton>
 					</View>
 				)}

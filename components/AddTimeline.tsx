@@ -8,7 +8,7 @@ import { makeListTimelineNameWithAcctId, makeTimelineNameWithAcctId } from '@/ut
 import type { IState } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
 import { Host, Label, List } from '@expo/ui/swift-ui'
-import { frame } from '@expo/ui/swift-ui/modifiers'
+import { environment, frame, listStyle } from '@expo/ui/swift-ui/modifiers'
 import RNBottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
 import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
@@ -204,19 +204,13 @@ export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 						<View style={{ height: 400, width: '100%' }}>
 							<Host style={{ flex: 1, backgroundColor: 'transparent' }}>
 								<List
-									scrollEnabled={true}
-									editModeEnabled={true}
 									onSelectionChange={(items) => console.log(`indexes of selected items: ${items.join(', ')}`)}
-									moveEnabled={true}
-									onMoveItem={(from, to) => moveTL(from, to)}
-									onDeleteItem={(item) => deleteTimeline(timelines[item].id)}
-									listStyle="automatic"
-									deleteEnabled={true}
-									selectEnabled={false}
-									modifiers={[frame({ width: width })]}
+									modifiers={[frame({ width: width }), environment('editMode', 'active'), listStyle('automatic')]}
 								>
 									{timelines.map((tl) => (
-										<Label title={tl.name} key={tl.id} modifiers={[frame({ width: width })]} />
+										<List.ForEach onDelete={([item]) => deleteTimeline(timelines[item].id)} key={tl.id} onMove={([from], to) => moveTL(from, to)}>
+											<Label title={tl.name}  modifiers={[frame({ width: width })]} />
+										</List.ForEach>
 									))}
 								</List>
 							</Host>

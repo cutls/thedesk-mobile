@@ -1,5 +1,4 @@
 import { ContextMenu, Host, Button as SwiftButton, type ButtonProps, type ContextMenuProps, type HostProps } from '@expo/ui/swift-ui'
-import type React from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface Props extends ContextMenuProps {
@@ -16,12 +15,11 @@ export function Dropdown({ style, children, data, onSelect, ...props }: Props) {
 	const { t } = useTranslation()
 	return (
 		<Host style={style}>
-			<ContextMenu activationMethod="singlePress" {...props}>
+			{/* <ContextMenu activationMethod="singlePress" {...props}> */}
+			<ContextMenu {...props}>
 				<ContextMenu.Items>
 					{data.map((item) => (
-						<SwiftButton key={item.value} systemImage={item.systemImage} onPress={() => onSelect(item.value)}>
-							{t(item.title)}
-						</SwiftButton>
+						<SwiftButton label={t(item.title)} key={item.value} systemImage={item.systemImage} onPress={() => onSelect(item.value)} />
 					))}
 				</ContextMenu.Items>
 				<ContextMenu.Trigger>{children}</ContextMenu.Trigger>

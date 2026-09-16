@@ -141,19 +141,10 @@ export const listenUser = async <T>(channel: string, callback: (a: { payload: T 
 			const streaming = userStreamings[i][1]
 			if (!streaming) continue
 			streaming.on('update', (status: Entity.Status, ch: string) => {
-				const isBouyomi = timelineConfig.ttsProvider === 'bouyomi'
 				if (tts) {
 					const html = status.content
 					const b = stripForVoice(html)
-					if (isBouyomi) {
-						try {
-							fetch(`http://localhost:${timelineConfig.ttsPort}/Talk?text=${encodeURIComponent(b)}`)
-						} catch {
-							console.error('Cannot TTS')
-						}
-					} else {
-						speech(b, timelineConfig)
-					}
+					speech(b, timelineConfig)
 				}
 				if (!ch || ch.includes('user')) callback({ payload: { status: status, acctId: userStreamings[i][0] } as T })
 			})

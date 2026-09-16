@@ -11,7 +11,6 @@ import type { FlashListRef } from '@shopify/flash-list'
 import { GlassView } from 'expo-glass-effect'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
-import type React from 'react'
 import { useCallback, useEffect, useState, type RefObject } from 'react'
 import { PlatformColor, Pressable, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Text } from './themed/Text'
@@ -83,7 +82,7 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 							<SymbolView name="gearshape" type="monochrome" tintColor={textColor} size={20} />
 						</TouchableOpacity>
 						<TouchableOpacity onPress={() => setIsTimelineConfigOpened(true)} style={{ width: width - 175, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ textAlign: 'center' }}>{currentTimeline?.name || '?'}</Text>
+							<Text style={{ textAlign: 'center' }}>{currentTimeline?.name || 'No data'}</Text>
 							<View style={{ position: 'absolute', top: 5, right: 10, width: 5, height: 5, borderRadius: 5, backgroundColor: badge[currentTimeline?.acctId || ''] ? 'red' : 'transparent' }} />
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.glass20} onPress={() => context.relayRef.current?.scrollToOffset({ offset: 0, animated: true })}>

@@ -1,13 +1,14 @@
 import { useWindowSize } from '@/hooks/useWindowSize'
 import type { ButtonProps, HostProps } from '@expo/ui/swift-ui'
+import { buttonStyle, controlSize, disabled, tint } from '@expo/ui/swift-ui/modifiers'
 import { SymbolView } from 'expo-symbols'
-import type React from 'react'
 import { ActivityIndicator, StyleSheet, useColorScheme, View } from 'react-native'
-import { Text } from '../themed/Text'
 import { ButtonSwiftUI } from './Button'
 
 interface Props extends ButtonProps {
 	style?: HostProps['style']
+	variant?: 'automatic' | 'bordered' | 'borderedProminent' | 'borderless' | 'glass' | 'glassProminent' | 'plain'
+	controlSize?: 'mini' | 'small' | 'regular' | 'large' | 'extraLarge'
 	color?: string
 	isPrimary?: boolean
 	width?: number
@@ -23,13 +24,17 @@ export function CustomedButton({ isPrimary, color, width: requestedWidth, isLoad
 	const useVariantNotGlass = isPrimary ? 'borderedProminent' : 'bordered'
 	const useVariantGlass = isPrimary ? 'glassProminent' : 'glass'
 	const variant = props.isGlass ? useVariantGlass : useVariantNotGlass
+	const modifiersStandard = [buttonStyle(variant), disabled(isLoading), props.controlSize ? controlSize(props.controlSize) : controlSize('regular')]
+	const modifiersWithColor = isPrimary && color ? [...modifiersStandard, tint(color)] : modifiersStandard
 
 	return (
-		<ButtonSwiftUI variant={variant} disabled={isLoading} onPress={() => (isLoading || !props.onPress) ? {} : props.onPress()} color={isPrimary ? color : undefined} style={[styles.btn, props.style]}>
+		<ButtonSwiftUI modifiers={modifiersWithColor} onPress={() => (isLoading || !props.onPress ? {} : props.onPress())} style={[styles.btn, props.style]}>
 			<View style={{ justifyContent: 'center', height: 40, flexDirection: 'row', alignItems: 'center', width: width - 65 }}>
-				{systemImage && !isLoading && <SymbolView name={systemImage} type="monochrome" tintColor={isPrimary ? 'white' : color ? color : isDark ? 'white' : 'black'} size={20} style={{ marginRight: 5 }} />}
+				{systemImage && !isLoading && (
+					<SymbolView name={systemImage} type="monochrome" tintColor={isPrimary ? 'white' : color ? color : isDark ? 'white' : 'black'} size={20} style={{ marginRight: 5 }} />
+				)}
 				{isLoading && <ActivityIndicator size="small" color={isPrimary ? 'white' : color ? color : isDark ? 'white' : 'black'} style={{ width: width - 65 }} />}
-				{!isLoading && <Text style={[{ textAlign: 'center', fontSize: 18, fontWeight: 'bold', color: isPrimary ? 'white' : color ? color : isDark ? 'white' : 'black' }]}>{props.children}</Text>}
+				{!isLoading && props.children}
 			</View>
 		</ButtonSwiftUI>
 	)
