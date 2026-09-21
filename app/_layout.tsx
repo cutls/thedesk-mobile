@@ -32,11 +32,13 @@ export default function RootLayout() {
 						<Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
 							<Stack.Screen name="index" options={{ headerShown: false, title: '' }} />
 							<Stack.Screen name="about" options={{ title: t('screen.about') }} />
-							<Stack.Screen name="login" options={{ title: t('screen.login') }} />
+							<Stack.Screen name="login" options={{ title: t('screen.login') }}>
+								<Stack.Header blurEffect="systemMaterial" />
+							</Stack.Screen>
 							<Stack.Screen name="acct" options={{ title: t('screen.acct') }} />
 							<Stack.Screen name="detail" options={{ title: t('screen.detail') }} />
 							<Stack.Screen name="onOtherAcct" options={{ title: t('screen.onOtherAcct') }} />
-							<Stack.Screen name="post" options={{ title: t('screen.post'), presentation: 'modal' }} />
+							<Stack.Screen name="post" options={{ title: t('screen.post'), presentation: 'formSheet' }} />
 							<Stack.Screen name="config" options={{ title: t('screen.config') }} />
 							<Stack.Screen name="search" options={{ title: t('screen.search') }} />
 							<Stack.Screen name="tag" options={{ title: t('screen.tag') }} />

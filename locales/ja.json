@@ -24,6 +24,7 @@
 		"onOtherAcct": "他のアカウントから操作"
 	},
 	"login": {
+		"domain": "インスタンスのドメイン",
 		"failed": "ログインに失敗しました",
 		"instance": {
 			"version": "バージョン",

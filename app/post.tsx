@@ -12,6 +12,7 @@ import { getAcctById, getUsualAcct } from '@/utils/storage'
 import type { ActionProps, ComposeMode } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
+import { useHeaderHeight } from '@react-navigation/elements'
 import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
 import { router, useLocalSearchParams, usePreventRemove } from 'expo-router'
@@ -88,6 +89,7 @@ export default function Post() {
 	const textColor = PlatformColor('label')
 	const isUnsavedChange = !!text || !!cw || uploaded.length > 0 || !!optional.poll || !!optional.scheduled_at
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(isUnsavedChange)
+	const headerHeight = useHeaderHeight()
 	useEffect(() => setHasUnsavedChanges(isUnsavedChange), [isUnsavedChange])
 
 	useEffect(() => {
@@ -185,6 +187,7 @@ export default function Post() {
 			const data = { ...options, spoiler_text: cw || undefined, visibility: vis, media_ids: uploaded.map((attachment) => attachment.id) }
 			if (editTargetId) await client.editStatus(editTargetId, { status: text, ...data })
 			else await client.postStatus(text, data)
+			setHasUnsavedChanges(false)
 			if (fromShare) {
 				router.replace('/')
 			} else {
@@ -213,7 +216,7 @@ export default function Post() {
 
 	return (
 		<>
-			<KeyboardAvoidingView behavior="height" style={{ flex: 1 }} automaticOffset={true}>
+			<KeyboardAvoidingView behavior="height" style={{ flex: 1, paddingTop: headerHeight }} automaticOffset={true}>
 				<GlassView style={styles.screen}>
 					{initializing ? (
 						<ActivityIndicator />

@@ -24,6 +24,7 @@
 		"onOtherAcct": "React from other accounts"
     },
     "login": {
+        "domain": "Instance domain",
         "failed": "Login failed",
 		"instance": {
 			"version": "Version",
