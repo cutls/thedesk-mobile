@@ -1,4 +1,3 @@
-import { RenderSimpleHTML } from '@/components/status/HTML'
 import { Text } from '@/components/themed/Text'
 import { Button } from '@/components/ui/Button'
 import type { Account } from '@/entities/account'
@@ -190,6 +189,9 @@ export default function Index() {
 					</View>
 				) : (
 					<View style={{ width: '100%' }}>
+						<Button color="teal" isPrimary={true} style={{ width: width - 40, height: 45, ...styles.link }} onPress={() => login()} width={width} isDark={isDark}>
+							{t('continue')}
+						</Button>
 						<ScrollView>
 							<View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
 								<Image
@@ -212,7 +214,7 @@ export default function Index() {
 								<Text style={styles.title}>{t('login.instance.version')}</Text>
 								<Text style={styles.text}>{instanceData?.version}</Text>
 							</View>
-							<Text style={[styles.title, { marginTop: 10, marginBottom: 5 }]}>{t('login.instance.description')}</Text>
+							{/* <Text style={[styles.title, { marginTop: 10, marginBottom: 5 }]}>{t('login.instance.description')}</Text>
 							<RenderSimpleHTML text={instanceData?.description || ''} txtColor={isDark ? 'white' : 'black'} />
 							{instanceData?.rules && instanceData.rules.length > 0 && <Text style={[styles.title, { marginTop: 10 }]}>{t('login.instance.rules')}</Text>}
 							{(instanceData?.rules || [])
@@ -222,7 +224,7 @@ export default function Index() {
 										<Text style={[styles.title, { marginBottom: 5, marginRight: 5 }]}>{rule.hint || rule.id}</Text>
 										<Text style={{ flexShrink: 1 }}>{rule.text}</Text>
 									</View>
-								))}
+								))} */}
 							{snsData?.compatibleSns === 'misskey' && (
 								<View style={{ borderWidth: 2, borderColor: PlatformColor('systemRed'), padding: 5, borderRadius: 10, marginTop: 10 }}>
 									<Text style={[]}>{t('login.instance.misskey')}</Text>
@@ -234,9 +236,6 @@ export default function Index() {
 								</View>
 							)}
 						</ScrollView>
-						<Button color="teal" isPrimary={true} style={{ width: width - 40, height: 45, ...styles.link }} onPress={() => login()} width={width} isDark={isDark}>
-							{t('continue')}
-						</Button>
 					</View>
 				)
 			) : (

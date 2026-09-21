@@ -37,8 +37,9 @@ export default function Index() {
 				const txt = stripTags(br)
 				setText(txt)
 				setTimeout(() => {
-					textArea.current?.focus()
-					textArea.current?.setSelection(0, txt.length)
+					const textAreaCurrent: any = textArea.current
+					textAreaCurrent?.focus()
+					textAreaCurrent?.setSelection(0, txt.length)
 				}, 100)
 			} finally {
 				setIsLoading(false)
@@ -48,8 +49,9 @@ export default function Index() {
 	}, [acctId, statusId])
 	const copy = async () => {
 		if (!text) return
-		textArea.current?.focus()
-		textArea.current?.setSelection(0, text.length)
+		const textAreaCurrent: any = textArea.current
+		textAreaCurrent?.focus()
+		textAreaCurrent?.setSelection(0, text.length)
 		await Clipboard.setStringAsync(text)
 		Alert.alert(t('timeline.action.copied'))
 	}
@@ -62,7 +64,7 @@ export default function Index() {
 	}
 	return (
 		<ScrollView style={{ paddingHorizontal: padding }}>
-			<TextInput ref={textArea} value={text || ''} editable={false} multiline={true} style={{ color: textColor}} />
+			<TextInput ref={textArea as any} value={text || ''} editable={false} multiline={true} style={{ color: textColor}} />
 			<Button onPress={() => copy()} style={{ margin: 10, height: 50 }} systemImage="doc.on.doc" width={width - 20} isDark={isDark}>
 				{t('timeline.action.copyText')}
 			</Button>

@@ -98,11 +98,9 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 		return null
 	}
 	useEffect(() => {
-		//if (isOpened) setTimeout(() => textInput.current?.focus(), 500)
-		// if (!isOpened) textInput.current?.blur()
-		if (!isInSheet) setTimeout(() => textInput.current?.focus(), 500)
-		if (isInSheet) textInput.current?.focus()
-		//}, [isOpened])
+		const textInputCurrent: any = textInput.current
+		if (!isInSheet) setTimeout(() => textInputCurrent?.focus(), 500)
+		if (isInSheet) textInputCurrent?.focus()
 	}, [])
 	useEffect(() => {
 		const main = async () => {
