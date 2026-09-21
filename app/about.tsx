@@ -4,10 +4,12 @@ import MIT from '@/components/license/mit'
 import { Text } from '@/components/themed/Text'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import Constants from 'expo-constants'
+import { GlassView } from 'expo-glass-effect'
 import { Image } from 'expo-image'
 import { openBrowserAsync } from 'expo-web-browser'
 import { PlatformColor, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-const logo = require('../assets/images/desk.png')
+const logo = require('../assets/images/desk.svg')
+const openai = require('../assets/images/openai.svg')
 
 export default function About() {
 	const { width } = useWindowSize()
@@ -23,17 +25,23 @@ export default function About() {
 					<Text style={{ color: PlatformColor('systemBlue'), textDecorationLine: 'underline' }}>Source code</Text>
 				</TouchableOpacity>
 			</View>
+			<GlassView style={{ padding: 10, borderRadius: 10, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }} tintColor={PlatformColor('systemGray6')}>
+				<Image source={openai} style={{ width: 50, height: 50 }} contentFit="contain" />
+				<View style={{ flex: 1 }}>
+					<Text>This app includes some product created by OpenAI Codex.</Text>
+				</View>
+			</GlassView>
 			<Text style={{ fontSize: 20, fontWeight: 'bold', marginVertical: 10 }}>LICENSE</Text>
 			<Text style={styles.title}>@cutls/megalodon</Text>
 			<MIT author="Copyright (c) 2025 h3poteto, cutls" />
+			<Text style={styles.title}>@cutls/galeria</Text>
+			<MIT author="Copyright (c) 2025 cutls, Fernando Rojo" />
 			<Text style={styles.title}>@edualm/react-native-now-playing</Text>
 			<MIT author="Copyright (c) 2021 Eduardo Almeida" />
 			<Text style={styles.title}>@expo/vector-icons</Text>
 			<MIT author="Copyright (c) 2015 Joel Arvidsson" />
 			<Text style={styles.title}>@gorhom/bottom-sheet</Text>
 			<MIT author="Copyright (c) 2026 cutls, 2020 Mo Gorhom" />
-			<Text style={styles.title}>@cutls/galeria</Text>
-			<MIT author="Copyright (c) 2025 Fernando Rojo" />
 			<Text style={styles.title}>@react-native-community/datetimepicker</Text>
 			<MIT author="Copyright (c) 2019 React Native Community" />
 			<Text style={styles.title}>@react-native-segmented-control/segmented-control</Text>
