@@ -63,93 +63,97 @@ export const Timeline = (props: IProps) => {
 		setUnread([])
 		flash()
 	}, [unread])
-	const load = async (refresh: boolean) => {
+	const load = async (refresh: boolean, reconnect: boolean) => {
 		try {
-			const getClient = async () => {
-				const acctData = await getAcctById(acctId)
-				setAcct(acctData)
-				if (!acctData) throw new Error('Account not found')
-				const https = `https://${acctData.domain}`
-				const c = generator(acctData.sns, https, acctData.accessToken)
-				setClient(c)
-				return c
+			if (refresh) {
+				const getClient = async () => {
+					const acctData = await getAcctById(acctId)
+					setAcct(acctData)
+					if (!acctData) throw new Error('Account not found')
+					const https = `https://${acctData.domain}`
+					const c = generator(acctData.sns, https, acctData.accessToken)
+					setClient(c)
+					return c
+				}
+				const useClient = client || (await getClient())
+				setIsRefreshing(true)
+				const option = {}
+				const res = await getStatuses(useClient, type, option, targetId)
+				setMaxId(res.maxId)
+				setFilters(getFilters(acctId, type))
+				setStatuses(res.data)
 			}
-			const useClient = client || (await getClient())
-			setIsRefreshing(true)
-			const option = {}
-			const res = await getStatuses(useClient, type, option, targetId)
-			setMaxId(res.maxId)
-			setFilters(getFilters(acctId, type))
-			setStatuses(res.data)
-			if (refresh) return
-			if (type === 'home') {
-				const fn = async () => {
-					await listenUserWaiter(acctId)
-					listenUser<ReceiveHomeStatusPayload>(
-						'receive-home-status',
-						(ev) => {
-							if (ev.payload.acctId !== acctId) return
-							setUnread((last) => appendStatus(last, ev.payload.status))
-						},
-						config.timeline,
-						false //TTS
-					)
+			if (reconnect) {
+				console.log('reconnector')
+				if (type === 'home') {
+					const fn = async () => {
+						await listenUserWaiter(acctId)
+						listenUser<ReceiveHomeStatusPayload>(
+							'receive-home-status',
+							(ev) => {
+								if (ev.payload.acctId !== acctId) return
+								setUnread((last) => appendStatus(last, ev.payload.status))
+							},
+							config.timeline,
+							false //TTS
+						)
 
-					listenUser<ReceiveHomeStatusUpdatePayload>(
-						'receive-home-status-update',
-						(ev) => {
-							if (ev.payload.acctId !== acctId) return
-							setStatuses((last) => updateStatuses(last, ev.payload.status))
-						},
-						config.timeline,
-						false //TTS
-					)
+						listenUser<ReceiveHomeStatusUpdatePayload>(
+							'receive-home-status-update',
+							(ev) => {
+								if (ev.payload.acctId !== acctId) return
+								setStatuses((last) => updateStatuses(last, ev.payload.status))
+							},
+							config.timeline,
+							false //TTS
+						)
 
-					listenUser<DeleteHomeStatusPayload>(
-						'delete-home-status',
-						(ev) => {
-							if (ev.payload.acctId !== acctId) return
-							setStatuses((last) => deleteStatus(last, ev.payload.statusId))
-						},
-						config.timeline,
-						false //TTS
-					)
+						listenUser<DeleteHomeStatusPayload>(
+							'delete-home-status',
+							(ev) => {
+								if (ev.payload.acctId !== acctId) return
+								setStatuses((last) => deleteStatus(last, ev.payload.statusId))
+							},
+							config.timeline,
+							false //TTS
+						)
+					}
+					fn()
+				} else {
+					const fn = async () => {
+						await listenTimelineWaiter(timeline.id)
+						listenTimeline<ReceiveTimelineStatusPayload>(
+							'receive-timeline-status',
+							(ev) => {
+								if (ev.payload.tlId !== timeline.id) return
+								setUnread((last) => appendStatus(last, ev.payload.status))
+							},
+							config.timeline,
+							false //TTS
+						)
+
+						listenTimeline<ReceiveTimelineStatusUpdatePayload>(
+							'receive-timeline-status-update',
+							(ev) => {
+								if (ev.payload.tlId !== timeline.id) return
+								setStatuses((last) => updateStatuses(last, ev.payload.status))
+							},
+							config.timeline,
+							false //TTS
+						)
+
+						listenTimeline<DeleteTimelineStatusPayload>(
+							'delete-timeline-status',
+							(ev) => {
+								if (ev.payload.tlId !== timeline.id) return
+								setStatuses((last) => deleteStatus(last, ev.payload.statusId))
+							},
+							config.timeline,
+							false //TTS
+						)
+					}
+					fn()
 				}
-				fn()
-			} else {
-				const fn = async () => {
-					await listenTimelineWaiter(timeline.id)
-					listenTimeline<ReceiveTimelineStatusPayload>(
-						'receive-timeline-status',
-						(ev) => {
-							if (ev.payload.tlId !== timeline.id) return
-							setUnread((last) => appendStatus(last, ev.payload.status))
-						},
-						config.timeline,
-						false //TTS
-					)
-
-					listenTimeline<ReceiveTimelineStatusUpdatePayload>(
-						'receive-timeline-status-update',
-						(ev) => {
-							if (ev.payload.tlId !== timeline.id) return
-							setStatuses((last) => updateStatuses(last, ev.payload.status))
-						},
-						config.timeline,
-						false //TTS
-					)
-
-					listenTimeline<DeleteTimelineStatusPayload>(
-						'delete-timeline-status',
-						(ev) => {
-							if (ev.payload.tlId !== timeline.id) return
-							setStatuses((last) => deleteStatus(last, ev.payload.statusId))
-						},
-						config.timeline,
-						false //TTS
-					)
-				}
-				fn()
 			}
 		} catch (e) {
 			console.log(e)
@@ -160,17 +164,20 @@ export const Timeline = (props: IProps) => {
 	}
 	useEffect(() => {
 		const _handleAppStateChange = async (nextAppState: AppStateStatus) => {
-			if (nextAppState === 'active') load(false)
+			if (nextAppState === 'active') load(false, true)
 		}
 		const e = AppState.addEventListener('change', _handleAppStateChange)
 		return () => e.remove()
 	}, [])
 	useFocusEffect(
 		useCallback(() => {
-			load(false)
+			load(false, true)
 			return () => {}
 		}, [])
 	)
+	useEffect(() => {
+		load(true, false)
+	}, [])
 	const more = async () => {
 		setIsMore(true)
 		try {
@@ -190,7 +197,7 @@ export const Timeline = (props: IProps) => {
 			data={statuses}
 			keyExtractor={(item) => item.id}
 			ref={relayRef}
-			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true)} />}
+			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true, false)} />}
 			ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
 			renderItem={({ item: status }) => (
 				<Status

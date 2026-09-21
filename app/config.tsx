@@ -20,7 +20,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 const actionCropContain = [
 	{ title: 'config.timeline.cropImage.cover', value: 'cover', systemImage: 'crop' as const },
-	{ title: 'config.timeline.cropImage.contain', value: 'contain', systemImage: 'square.arrowtriangle.4.outward' as const, isDestructive: true }
+	{ title: 'config.timeline.cropImage.contain', value: 'contain', systemImage: 'square.arrowtriangle.4.outward' as const }
 ]
 export default function Index() {
 	const { t } = useTranslation()
