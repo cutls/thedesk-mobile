@@ -1,8 +1,10 @@
 import AddTimeline from '@/components/AddTimeline'
 import ComposeSheetBase from '@/components/ComposeSheetBase'
 import { Columns } from '@/components/timeline/Columns'
-import { useWindowSize } from '@/hooks/useWindowSize'
-import { getTimelines, listAccts } from '@/utils/storage'
+import { defaultSetting } from '@/entities/settings'
+import { getSettings, getTimelines, listAccts } from '@/utils/storage'
+import { useConfigStore } from '@/utils/store/config'
+import { useTimelineStore } from '@/utils/store/timelines'
 import { useFilterStore } from '@/utils/store/filter'
 import type { ActionProps } from '@/utils/type'
 import generator from '@cutls/megalodon'
@@ -13,16 +15,21 @@ import { StyleSheet, View } from 'react-native'
 import Navigator from '../components/Navigator'
 
 export default function Index() {
-	const { width } = useWindowSize()
+	const { config, setConfig } = useConfigStore()
+	const { timelines } = useTimelineStore()
+	const composerDisplay = config.compose?.display ?? defaultSetting.compose.display
 	const [isComposeOpened, setIsComposeOpened] = useState(false)
 	const [isAddTLOpened, setIsAddTLOpened] = useState(false)
 	const [current, setCurrent] = useState(0)
+	const currentAcctId = timelines[current]?.acctId || ''
 	const [composeAction, setComposeAction] = useState<ActionProps | null>(null)
 	const relayRef = useRef<FlashListRef<any>>(null)
 	const router = useRouter()
 	const { setFilters } = useFilterStore()
 	useEffect(() => {
 		const fn = async () => {
+			const stored = await getSettings()
+			if (stored) setConfig(stored)
 			const accts = await listAccts()
 			if (accts.length === 0) router.replace('/login')
 			const timeline = await getTimelines()
@@ -37,15 +44,30 @@ export default function Index() {
 		fn()
 	}, [])
 	useEffect(() => {
-		const fn = async () => {
-			const accts = await listAccts()
-			setComposeAction({ acctId: accts[current]?.id || '' })
-		}
-		fn()
-	}, [current])
+		setComposeAction({ acctId: currentAcctId })
+	}, [current, currentAcctId])
 	useEffect(() => {
-		if (composeAction?.type) setIsComposeOpened(true)
-	}, [composeAction])
+		if (!composeAction?.type) return
+		if (composerDisplay === 'screen') {
+			const { type, acctId, targetId, addText, visibility, status } = composeAction
+			setIsComposeOpened(false)
+			setComposeAction({ acctId })
+			router.push({
+				pathname: '/post',
+				params: {
+					acctId,
+					targetId,
+					statusId: status?.id || targetId,
+					mode: type,
+					// post.tsx decodes this field after Expo Router reads the params.
+					addText: addText ? encodeURIComponent(addText) : undefined,
+					visibility
+				}
+			})
+		} else {
+			setIsComposeOpened(true)
+		}
+	}, [composeAction, composerDisplay])
 	return (
 		<View style={styles.container}>
 			<Columns context={{ current, setCurrent, relayRef, setComposeAction }} />

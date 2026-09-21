@@ -274,6 +274,12 @@
 		}
 	},
 	"config": {
+		"compose": {
+			"title": "投稿",
+			"display": "表示方法",
+			"sheet": "ボトムシート",
+			"screen": "独立した画面"
+		},
 		"save": "保存",
 		"timeline": {
 			"title": "タイムライン",

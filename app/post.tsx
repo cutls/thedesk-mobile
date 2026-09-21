@@ -12,9 +12,10 @@ import { getAcctById, getUsualAcct } from '@/utils/storage'
 import type { ActionProps, ComposeMode } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
+import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useHeaderHeight } from "expo-router/react-navigation"
+import { useHeaderHeight } from 'expo-router/react-navigation'
 import { SymbolView } from 'expo-symbols'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +27,7 @@ interface PostParams {
 	acctId?: string
 	targetId?: string
 	addText?: string
+	addImage?: string //  JSON
 	statusId?: string
 	visibility?: ActionProps['visibility']
 }
@@ -66,7 +68,8 @@ function ModeSheet({ children, close, scrollable = true }: { children: ReactNode
 }
 
 export default function Post() {
-	const { mode: type, acctId, targetId, addText: encodedText, statusId, visibility } = useLocalSearchParams() as unknown as PostParams
+	const { mode: type, acctId, targetId, addText: encodedText, addImage: addImageRaw, statusId, visibility } = useLocalSearchParams() as unknown as PostParams
+	const addImage = addImageRaw ? JSON.parse(addImageRaw) : undefined
 	const { t } = useTranslation()
 	const insets = useSafeAreaInsets()
 	const headerHeight = useHeaderHeight()
@@ -97,7 +100,24 @@ export default function Post() {
 				if (cancelled) return
 				setText(encodedText ? decodeURIComponent(encodedText) : '')
 				setCW(status?.spoiler_text || '')
-				setUploaded(status?.media_attachments || [])
+				if (addImage) {
+					console.log('addImage', addImage)
+					for (const image of addImage) {
+						console.log(image)
+						const response = await fetch(image)
+						console.log('response', response)
+						const uuid = randomUUID()
+						const blob = await response.blob()
+						const result = await api.uploadMedia({
+							uri: image,
+							type: blob.type,
+							name: `${uuid}.jpg`
+						})
+						if (result.data) setUploaded((prev) => [...prev, result.data])
+					}
+				} else {
+					setUploaded(status?.media_attachments || [])
+				}
 				setOptional({
 					in_reply_to_id: type === 'reply' ? targetId : undefined,
 					quoted_status_id: type === 'quote' ? targetId : undefined,

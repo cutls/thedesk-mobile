@@ -34,9 +34,9 @@ export const Columns = ({ context }: IProps) => {
 	const lang = Localization.getLocales()[0]?.languageTag === 'ja-JP' ? 'ja' : 'en'
 	const action = async (client: MegalodonInterface, account: Account, type: 'quote' | 'reply' | 'edit', target: Entity.Status) => {
 		const isMe = target.account.acct !== account.username ? `@${target.account.acct} ` : ''
-		if (type === 'reply') setComposeAction({ type: 'reply', acctId: '1', targetId: target.id, addText: `${isMe}${getAllMentions(target)}` })
-		if (type === 'quote') setComposeAction({ type: 'quote', acctId: '1', targetId: target.id })
-		if (type === 'edit') setComposeAction({ type: 'edit', acctId: '1', targetId: target.id, addText: await getSourceText(target, client), status: target })
+		if (type === 'reply') setComposeAction({ type: 'reply', acctId: account.id, targetId: target.id, addText: `${isMe}${getAllMentions(target)}` })
+		if (type === 'quote') setComposeAction({ type: 'quote', acctId: account.id, targetId: target.id })
+		if (type === 'edit') setComposeAction({ type: 'edit', acctId: account.id, targetId: target.id, addText: await getSourceText(target, client), status: target })
 	}
 	const columnWidth = config.timeline.widthInTablet || 350
 	useEffect(() => {

@@ -22,6 +22,10 @@ const actionCropContain = [
 	{ title: 'config.timeline.cropImage.cover', value: 'cover', systemImage: 'crop' as const },
 	{ title: 'config.timeline.cropImage.contain', value: 'contain', systemImage: 'square.arrowtriangle.4.outward' as const }
 ]
+const composerDisplays = [
+	{ title: 'config.compose.sheet', value: 'sheet' },
+	{ title: 'config.compose.screen', value: 'screen' }
+]
 export default function Index() {
 	const { t } = useTranslation()
 
@@ -44,6 +48,7 @@ export default function Index() {
 	const nowPlaying = config.nowPlaying || defaultSetting.nowPlaying
 	const [attachArtwork, setAttachArtwork] = useState(nowPlaying.attachArtwork === 'yes')
 	const [npTemplate, setNpTemplate] = useState(nowPlaying.template || '')
+	const [composerDisplay, setComposerDisplay] = useState(config.compose?.display ?? defaultSetting.compose.display)
 	const isDirty = useRef(false)
 
 	// Load persisted settings on mount
@@ -52,6 +57,7 @@ export default function Index() {
 			const stored = await getSettings()
 			if (stored) {
 				setConfig(stored)
+				setComposerDisplay(stored.compose?.display ?? defaultSetting.compose.display)
 				const timeline = stored.timeline || defaultSetting.timeline
 				setMaxImageHeight(String(timeline.maxImageHeight))
 				setMaxLength(String(timeline.maxLength))
@@ -92,6 +98,7 @@ export default function Index() {
 
 		const updated = {
 			...config,
+			compose: { ...defaultSetting.compose, ...config.compose, display: composerDisplay },
 			timeline: { ...config.timeline, maxImageHeight: heightValue, maxLength: lengthValue, animation: (animation ? 'yes' : 'no') as 'yes' | 'no', cropImage, widthInTablet: tabletWidthValue },
 			nowPlaying: { ...config.nowPlaying, attachArtwork: (attachArtwork ? 'yes' : 'no') as 'yes' | 'no', template: npTemplate || defaultSetting.nowPlaying.template }
 		}
@@ -216,6 +223,29 @@ export default function Index() {
 							selectionColor={getColorIOS('systemBlue') || 'blue'}
 							style={[staticStyles.input, styles.numberInput, { color: isDark ? 'white' : 'black' }]}
 						/>
+					</View>
+				</GlassView>
+
+				<Text style={styles.sectionHeader}>{t('config.compose.title')}</Text>
+				<GlassView style={styles.card}>
+					<View style={styles.row}>
+						<View style={styles.labelContainer}>
+							<Text style={styles.label}>{t('config.compose.display')}</Text>
+						</View>
+						<Dropdown
+							data={composerDisplays}
+							onSelect={(value) => {
+								if (value !== 'sheet' && value !== 'screen') return
+								setComposerDisplay(value)
+								isDirty.current = true
+							}}
+							modifiers={[ignoreSafeArea({ regions: 'all' })]}
+						>
+							<View style={styles.pickerButton}>
+								<Text style={styles.pickerButtonText}>{t(`config.compose.${composerDisplay}`)}</Text>
+								<SymbolView name="chevron.up.chevron.down" type="monochrome" tintColor={getColorIOS('systemBlue') || 'blue'} size={12} />
+							</View>
+						</Dropdown>
 					</View>
 				</GlassView>
 

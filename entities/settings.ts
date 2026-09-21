@@ -18,6 +18,7 @@ export type Settings = {
 		widthInTablet: number
 	}
 	compose: {
+		display: 'sheet' | 'screen'
 		floating: FormBoolean
 		btnPosition: 'left' | 'right'
 		afterPost: 'close' | 'stay'
@@ -47,6 +48,7 @@ export const defaultSetting: Settings = {
 		widthInTablet: 350
 	},
 	compose: {
+		display: 'sheet',
 		floating: 'yes',
 		btnPosition: 'right',
 		afterPost: 'close',

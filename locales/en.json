@@ -274,6 +274,12 @@
 		}
 	},
 	"config": {
+		"compose": {
+			"title": "Composer",
+			"display": "Display mode",
+			"sheet": "BottomSheet",
+			"screen": "Separate screen"
+		},
 		"save": "Save",
 		"timeline": {
 			"title": "Timeline",

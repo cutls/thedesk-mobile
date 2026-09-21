@@ -23,6 +23,7 @@ export const uploadCallback = async (callback: (result: Entity.Attachment | Enti
 		for (const asset of result.assets) {
 			if (!client) throw 'No client'
 			const uri = asset.uri
+			console.log('uri', uri)
 			const response = await fetch(uri)
 			console.log('response', response)
 			const blob = await response.blob()

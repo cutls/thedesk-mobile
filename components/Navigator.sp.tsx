@@ -3,6 +3,7 @@ import { defaultSetting } from '@/entities/settings'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import { allClose, listenUser, start } from '@/utils/socket'
 import { getTimelineAccount, listAccts } from '@/utils/storage'
+import { useConfigStore } from '@/utils/store/config'
 import { useTimelineStore } from '@/utils/store/timelines'
 import { capitalizeFirst } from '@/utils/string'
 import { icon } from '@/utils/timelineName'
@@ -39,6 +40,11 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 	const [badge, setBadge] = useState<Record<string, boolean>>({})
 	const currentTimeline = timelines[context.current]
 	const router = useRouter()
+	const composerDisplay = useConfigStore((state) => state.config.compose?.display ?? defaultSetting.compose.display)
+	const compose = () => {
+		if (composerDisplay === 'screen') router.push({ pathname: '/post', params: { acctId: currentTimeline?.acctId || '' } })
+		else openComposer()
+	}
 	const load = async () => {
 		const accounts = await listAccts()
 		setAllAcctData(accounts)
@@ -117,7 +123,7 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 					</ScrollView>
 				</View>
 			</View>
-			<IconButton onPress={() => openComposer()} style={{ width: 60, height: 60, margin: 5, marginTop: 20 }} isPrimary={true} color="teal" systemImage="square.and.pencil" width={60} isDark={isDark} />
+			<IconButton onPress={compose} style={{ width: 60, height: 60, margin: 5, marginTop: 20 }} isPrimary={true} color="teal" systemImage="square.and.pencil" width={60} isDark={isDark} />
 			
 		</GlassView>
 		{currentTimeline && <TimelineConfig isOpened={isTimelineConfigOpened} setIsOpened={setIsTimelineConfigOpened} timeline={currentTimeline} />}
