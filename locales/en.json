@@ -1,4 +1,8 @@
 {
+    "share": {
+        "selectAccount": "Please select an account to post from",
+        "goToPost": "Go to Post"
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "add": "Add",

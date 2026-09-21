@@ -29,4 +29,4 @@ This software is hosted at `push.thedesk.top` only for official TheDesk mobile. 
 
 #### Notice
 
-This app includes some product created by Anthoropic Claude and GitHub Copilot.
+This app includes some product created by OpenAI Codex and other LLMs.

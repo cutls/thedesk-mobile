@@ -9,7 +9,6 @@ import { Image } from 'expo-image'
 import { openBrowserAsync } from 'expo-web-browser'
 import { PlatformColor, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 const logo = require('../assets/images/desk.svg')
-const openai = require('../assets/images/openai.svg')
 
 export default function About() {
 	const { width } = useWindowSize()
@@ -26,10 +25,7 @@ export default function About() {
 				</TouchableOpacity>
 			</View>
 			<GlassView style={{ padding: 10, borderRadius: 10, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }} tintColor={PlatformColor('systemGray6')}>
-				<Image source={openai} style={{ width: 50, height: 50 }} contentFit="contain" />
-				<View style={{ flex: 1 }}>
-					<Text>This app includes some product created by OpenAI Codex.</Text>
-				</View>
+				<Text>This app includes some product created by OpenAI Codex and other LLMs.</Text>
 			</GlassView>
 			<Text style={{ fontSize: 20, fontWeight: 'bold', marginVertical: 10 }}>LICENSE</Text>
 			<Text style={styles.title}>@cutls/megalodon</Text>
@@ -64,7 +60,7 @@ export default function About() {
 			<MIT author="Copyright (c) 2021 Sasha Koss and Lesha Koss https://kossnocorp.mit-license.org" />
 			<Text style={styles.title}>
 				expo, @expo/ui, expo-blob, expo-blur, expo-clipboard, expo-constants, expo-crypto, expo-dev-client, expo-font, expo-glass-effect, expo-haptics, expo-image, expo-image-manipulator,
-				expo-image-picker, expo-linking, expo-localization, expo-media-library, expo-notifications, expo-router, expo-splash-screen, expo-sqlite, expo-status-bar, expo-symbols, expo-system-ui,
+				expo-image-picker, expo-linking, expo-localization, expo-media-library, expo-notifications, expo-router, expo-sharing, expo-splash-screen, expo-sqlite, expo-status-bar, expo-symbols, expo-system-ui,
 				expo-updates, expo-web-browser
 			</Text>
 			<MIT author="Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)" />

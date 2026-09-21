@@ -1,4 +1,8 @@
 {
+    "share": {
+        "selectAccount": "投稿するアカウントを選択してください",
+        "goToPost": "投稿画面へ"
+    },
 	"ok": "OK",
 	"cancel": "キャンセル",
 	"add": "追加",

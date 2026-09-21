@@ -53,7 +53,21 @@
       "expo-font",
       "expo-image",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-sharing",
+        {
+          "ios": {
+            "enabled": true,
+            "activationRule": {
+              "supportsImageWithMaxCount": 4,
+              "supportsText": true,
+              "supportsMovieWithMaxCount": 1,
+              "supportsWebPageWithMaxCount": 1
+            }
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
