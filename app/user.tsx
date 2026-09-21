@@ -19,7 +19,8 @@ import { useWindowSize } from '@/hooks/useWindowSize'
 import { getAcctById } from '@/utils/storage'
 import { calcFromNow } from '@/utils/timeline'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
-import SegmentedControl from '@react-native-segmented-control/segmented-control'
+import { Host, Picker, Text as SwiftUIText } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { BlurView } from 'expo-blur'
 import { GlassView } from 'expo-glass-effect'
 import { Image } from 'expo-image'
@@ -69,7 +70,7 @@ export default function Index() {
 	const router = useRouter()
 	const params = useLocalSearchParams()
 	const { acctId, userId } = params as Record<'acctId' | 'userId', string>
-	
+
 	const { width, deviceWidth } = useWindowSize()
 	const padding = (deviceWidth - width) / 2
 	const styles = createStyles({ width })
@@ -86,6 +87,7 @@ export default function Index() {
 	const [page, setPage] = useState(0)
 	const verifiedBg = isDark ? '#083416' : '#d2e2d7'
 	const lang = Localization.getLocales()[0]?.languageTag === 'ja-JP' ? 'ja' : 'en'
+	const options = [t('user.posts'), t('user.follows'), t('user.followers')]
 	const updateRelation = async () => {
 		if (!client) return
 		const r = await client.getRelationship(userId)
@@ -121,7 +123,7 @@ export default function Index() {
 	}
 	return (
 		<>
-			<View style={{ position: 'sticky', top: 0, left: 0, right: 0, alignItems: 'center', height: 100, justifyContent: 'center', zIndex: 5 }}>
+			<View style={{ position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', height: 100, justifyContent: 'center', zIndex: 5 }}>
 				<View
 					style={{
 						position: 'absolute',
@@ -135,7 +137,7 @@ export default function Index() {
 					}}
 				>
 					<IconButton onPress={() => router.back()} style={{ width: 45, height: 45 }} systemImage="chevron.left" width={45} isDark={isDark} />
-					<Button onPress={() => ref.current?.scrollTo(0)} style={{ width: 200, height: 45, opacity: scrollY > 300 ? 100 : 0, padding: 10 }} width={200} isDark={isDark}>
+					<Button onPress={() => (ref.current as any)?.scrollTo(0)} style={{ width: 200, height: 45, opacity: scrollY > 300 ? 100 : 0, padding: 10 }} width={200} isDark={isDark}>
 						{basic.acct}
 					</Button>
 					{relation && (
@@ -150,12 +152,16 @@ export default function Index() {
 				<BlurView intensity={scrollY > 300 ? 100 : 0} style={{ position: 'absolute', height: 120, width }}></BlurView>
 			</View>
 			<Image style={[styles.header, { height: Math.max(340, 300 - Math.min(0, scrollY)), marginLeft: padding }]} source={{ uri: basic.header }} />
-			<ScrollView ref={ref} onScroll={(e) => setScrollY(e.nativeEvent.contentOffset.y)} style={{ position: 'absolute', width, top: 0, left: padding, right: 0, bottom: 0 }}>
+			<ScrollView ref={ref as any} onScroll={(e) => setScrollY(e.nativeEvent.contentOffset.y)} style={{ position: 'absolute', width, top: 0, left: padding, right: 0, bottom: 0 }}>
 				<View style={styles.headerWrap} />
 				<GlassViewFallback isPreview={isPreview} style={styles.infoBar}>
 					<View style={{ width: 80, justifyContent: 'center', alignItems: 'center' }}>
 						<Avatar src={basic.avatar} size={80} />
-						{relation && <View style={styles.relation}><Relation relation={relation} textColor={textColor} /></View>}
+						{relation && (
+							<View style={styles.relation}>
+								<Relation relation={relation} textColor={textColor} />
+							</View>
+						)}
 					</View>
 					<View style={{ marginLeft: 5 }}>
 						<AccountName account={basic} fontSize={24} width={width - 145} />
@@ -218,14 +224,22 @@ export default function Index() {
 						</View>
 					))}
 				</View>
-				<SegmentedControl
-					values={[t('user.posts'), t('user.follows'), t('user.followers')]}
-					selectedIndex={page}
-					onChange={(event) => {
-						setPage(event.nativeEvent.selectedSegmentIndex)
-					}}
-					style={{ backgroundColor: isDark ? '#111' : '#fff' }}
-				/>
+				<Host style={{ height: 50, backgroundColor: isDark ? '#111' : '#fff' }}>
+					<Picker
+						modifiers={[pickerStyle('segmented')]}
+						label="Select a fruit"
+						selection={page}
+						onSelectionChange={(selection) => {
+							setPage(selection)
+						}}
+					>
+						{options.map((option, i) => (
+							<SwiftUIText key={option} modifiers={[tag(i)]}>
+								{option}
+							</SwiftUIText>
+						))}
+					</Picker>
+				</Host>
 				{page === 0 && (
 					<View style={{ flex: 1, backgroundColor: isDark ? '#111' : '#fff' }}>
 						<ProfileStatuses lang={lang} targetId={basic.id} client={client} acct={acct} columnWidth={width} />
