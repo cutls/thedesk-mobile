@@ -80,7 +80,7 @@ export const Columns = ({ context }: IProps) => {
 				<ScrollView
 					ref={refScroll}
 					horizontal={true}
-					style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'row' }}
+					style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'row', marginTop: 10 }}
 					onScrollBeginDrag={(e) => setCurrent(Math.max(0, Math.floor(e.nativeEvent.contentOffset.x / columnWidth)))}
 				>
 					{timelines.map((timeline, index) => (
