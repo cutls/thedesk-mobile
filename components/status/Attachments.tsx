@@ -1,4 +1,5 @@
 import type { Settings } from '@/entities/settings'
+import { downloadImage } from '@/utils/download'
 import { Galeria } from '@cutls/galeria'
 import type { Entity } from '@cutls/megalodon'
 import { Image } from 'expo-image'
@@ -47,8 +48,15 @@ export const Attachment = (props: IProps) => {
 		)
 	}
 	const getImageIndex = (id: string) => attachments.filter((a) => a.type === 'image').findIndex((a) => a.id === id)
+	const galeriaList = attachments.filter((a) => a.type === 'image').map((a) => a.url)
 	return (
-		<Galeria urls={attachments.filter((a) => a.type === 'image').map((a) => a.url)}>
+		<Galeria
+			urls={galeriaList}
+			actions={[
+				{ icon: 'download', onPress: (index) => downloadImage(galeriaList[index]) },
+				{ icon: 'share', onPress: (index) => openBrowserAsync(galeriaList[index]) }
+			]}
+		>
 			<View style={{ display: 'flex', flexDirection: 'row', marginVertical: 5, gap: 5 }}>
 				{attachments.map((a, index) => {
 					if (a.type !== 'image') {
@@ -67,7 +75,6 @@ export const Attachment = (props: IProps) => {
 						</Galeria.Image>
 					)
 				})}
-
 			</View>
 		</Galeria>
 	)
