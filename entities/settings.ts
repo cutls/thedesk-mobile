@@ -48,7 +48,7 @@ export const defaultSetting: Settings = {
 		widthInTablet: 350
 	},
 	compose: {
-		display: 'sheet',
+		display: 'screen',
 		floating: 'yes',
 		btnPosition: 'right',
 		afterPost: 'close',

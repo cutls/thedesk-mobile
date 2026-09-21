@@ -4,7 +4,7 @@ import { useConfigStore } from '@/utils/store/config'
 import type { ComposeMode, IState } from '@/utils/type'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import Fontisto from '@expo/vector-icons/Fontisto'
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, PlatformColor, StyleSheet, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
@@ -14,8 +14,9 @@ interface Props {
 	changeMode: (m: ComposeMode) => void
 	client: MegalodonInterface | null
 	npSet: { setText: IState<string>; setUploaded: IState<Array<Entity.Attachment | Entity.AsyncAttachment>> }
+	inSheet?: boolean
 }
-export default function Menu({ changeMode, npSet, client }: Props) {
+export default function Menu({ changeMode, npSet, client, inSheet }: Props) {
 	const { t } = useTranslation()
 	const { config } = useConfigStore()
 	const { width } = useWindowSize()
@@ -45,7 +46,7 @@ export default function Menu({ changeMode, npSet, client }: Props) {
 		}
 	}
 	return (
-		<View style={{ minHeight: 320 }}>
+		<View style={{ minHeight: inSheet ? 320 : undefined }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 				<Text style={{ fontWeight: 'bold', fontSize: 18 }}>NowPlaying</Text>
 				<CustomButton onPress={() => np('apple')} style={{ marginVertical: 5, width: 100, height: 50 }}>
@@ -62,9 +63,9 @@ export default function Menu({ changeMode, npSet, client }: Props) {
 			<Button width={width - 40} isDark={isDark} onPress={() => changeMode('schedule')} style={{ marginVertical: 10, height: 50 }}>
 				{t('composer.menu.schedule')}
 			</Button>
-			<Button isPrimary={true} width={width - 40} isDark={isDark} onPress={() => changeMode('compose')} style={{ height: 50 }}>
+			{inSheet && <Button isPrimary={true} width={width - 40} isDark={isDark} onPress={() => changeMode('compose')} style={{ height: 50 }}>
 				{t('composer.menu.return')}
-			</Button>
+			</Button>}
 		</View>
 	)
 }

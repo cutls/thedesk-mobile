@@ -6,7 +6,7 @@ import { getAcctById, getUsualAcct } from '@/utils/storage'
 import type { ActionProps, ComposeMode } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
 import { SymbolView } from 'expo-symbols'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import Avatar from './Avatar'
@@ -174,7 +174,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 	}
 	if (!useAcct) return null
 	return (
-		<View style={{ padding: 10 }}>
+		<View style={{ padding: 10, flexDirection: 'column', height: 345 }}>
 			{mode === 'compose' && (
 				<>
 					<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -197,11 +197,9 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 							{isInSheet && <IconButton onPress={() => closeCk()} systemImage="xmark" style={{ width: 40, height: 40 }} width={40} isDark={isDark} />}
 						</View>
 					</View>
-					{composeAction?.type && (
-						<View style={{}}>
-							<Text>{t(`composer.${composeAction.type}`)}</Text>
-						</View>
-					)}
+					<View style={{}}>
+						<Text>{composeAction?.type ? t(`composer.${composeAction.type}`) : ' '}</Text>
+					</View>
 				</>
 			)}
 			{mode === 'compose' && (

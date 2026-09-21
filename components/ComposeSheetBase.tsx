@@ -12,7 +12,7 @@ interface Props {
 	composeAction: ActionProps | null
 	clearComposeAction: (acctId: string) => void
 }
-const GlassViewCustom = (props: React.ComponentProps<typeof GlassView>) => <GlassView {...props} style={[props.style, { borderRadius: 20 }]} />
+const GlassViewCustom = (props: React.ComponentProps<typeof GlassView>) => <GlassView {...props} style={[props.style, { borderRadius: 20, marginBottom: 5 }]} />
 export default function ComposeSheetBase({ isOpened, setIsOpened, composeAction, clearComposeAction }: Props) {
 	const { width } = useWindowSize()
 	const textColor = PlatformColor('label')

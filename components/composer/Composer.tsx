@@ -8,6 +8,7 @@ import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import { ignoreSafeArea } from '@expo/ui/swift-ui/modifiers'
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { getColorIOS } from 'expo-color-to-hex'
+import { GlassView } from 'expo-glass-effect'
 import { Image } from 'expo-image'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -99,8 +100,9 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 	useEffect(() => {
 		//if (isOpened) setTimeout(() => textInput.current?.focus(), 500)
 		// if (!isOpened) textInput.current?.blur()
-		textInput.current?.focus()
-	//}, [isOpened])
+		if (!isInSheet) setTimeout(() => textInput.current?.focus(), 500)
+		if (isInSheet) textInput.current?.focus()
+		//}, [isOpened])
 	}, [])
 	useEffect(() => {
 		const main = async () => {
@@ -114,7 +116,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 		main()
 	}, [selection])
 	return (
-		<View>
+		<View style={{ flexDirection: 'column', flexGrow: 1, flexShrink: 1 }}>
 			<View style={{ flexDirection: 'row', marginBottom: 5, justifyContent: 'flex-end' }}>
 				{uploaded.map((a) => (
 					<TouchableOpacity activeOpacity={0.7} key={a.id} onPress={() => deleteItem(a.id)}>
@@ -149,7 +151,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 				onChangeText={(t) => setText(t)}
 				ref={textInput as any}
 				multiline={true}
-				style={[styles.textarea, { height: isCW ? 100 : 200, color: textColor }]}
+				style={[styles.textarea, { flexGrow: 1, flexShrink: 1, color: textColor }]}
 				placeholder={t('composer.placeholder')}
 				placeholderTextColor={isDark ? 'lightgray' : 'gray'}
 				inputAccessoryViewID="textAreaSuggest"
@@ -157,23 +159,21 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 					setSelection(selection)
 				}}
 			/>
-			{suggested.length > 0 && (
-				<InputAccessoryView nativeID="textAreaSuggest">
-					<View style={{ backgroundColor: PlatformColor('systemBackground'), height: 40, width: '100%' }}>
-						<FlatList
-							data={suggested as any}
-							horizontal={true}
-							renderItem={({ item }: any) => renderSuggest(item)}
-							keyExtractor={(s) => s.id || s.shortcode}
-							style={{}}
-							keyboardShouldPersistTaps="handled"
-						/>
-					</View>
-				</InputAccessoryView>
-			)}
-			<View style={{ display: 'flex', justifyContent: 'space-between', marginVertical: 5, paddingBottom: 10, flexDirection: 'row', gap: 2 }}>
+			<InputAccessoryView nativeID="textAreaSuggest">
+				<GlassView style={{ display: suggested.length ? 'flex' : 'none', height: 40, width: width - 10, marginLeft: 5, borderRadius: 10, marginVertical: 5 }}>
+					<FlatList
+						data={suggested as any}
+						horizontal={true}
+						renderItem={({ item }: any) => renderSuggest(item)}
+						keyExtractor={(s) => s.id || s.shortcode}
+						style={{}}
+						keyboardShouldPersistTaps="handled"
+					/>
+				</GlassView>
+			</InputAccessoryView>
+			<View style={{ display: 'flex', justifyContent: 'space-between', marginVertical: 5, paddingBottom: 0, flexDirection: 'row', gap: 2 }}>
 				<IconButton style={{ width: 40, height: 40 }} width={40} isDark={isDark} systemImage="line.3.horizontal" onPress={() => changeMode('menu')} />
-				<Button style={{ width: 40, height: 40 }} width={40} color={isCW ? (getColorIOS('systemYellow') || undefined) : undefined} isDark={isDark} onPress={() => setIsCW(!isCW)}>
+				<Button style={{ width: 40, height: 40 }} width={40} color={isCW ? getColorIOS('systemYellow') || undefined : undefined} isDark={isDark} onPress={() => setIsCW(!isCW)}>
 					CW
 				</Button>
 				<IconButton style={{ width: 40, height: 40 }} width={40} isDark={isDark} systemImage="face.smiling" onPress={() => changeMode('emoji')} />
@@ -211,7 +211,6 @@ const createStyles = ({ width }: { width: number }) =>
 		},
 		cw: {},
 		suggested: {
-			height: 40,
 			marginHorizontal: 5,
 			display: 'flex',
 			flexDirection: 'row',

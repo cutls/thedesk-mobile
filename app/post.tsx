@@ -19,7 +19,8 @@ import { useHeaderHeight } from 'expo-router/react-navigation'
 import { SymbolView } from 'expo-symbols'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform, PlatformColor, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Keyboard, PlatformColor, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface PostParams {
@@ -47,8 +48,8 @@ function ModeSheet({ children, close, scrollable = true }: { children: ReactNode
 	return (
 		<BottomSheet
 			index={0}
-			snapPoints={['70%', '90%']}
-			enableDynamicSizing={false}
+			snapPoints={scrollable ? ['70%', '90%'] : undefined}
+			enableDynamicSizing={!scrollable}
 			enablePanDownToClose
 			enableBlurKeyboardOnGesture
 			keyboardBlurBehavior="restore"
@@ -195,47 +196,45 @@ export default function Post() {
 	}
 
 	return (
-		<View style={styles.screen}>
-			<KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={headerHeight}>
-				<ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}>
-					{initializing ? (
-						<ActivityIndicator />
-					) : acct ? (
-						<View pointerEvents={posting || !client ? 'none' : 'auto'}>
-							<View style={styles.header}>
-								<TouchableOpacity activeOpacity={0.7} onPress={() => changeMode('acct')} style={styles.account}>
-									<Avatar src={acct.avatar || acct.favicon} fallback={acct.sns} size={24} />
-									<Text style={styles.username} numberOfLines={1}>
-										{acct.username}@{acct.domain}
-									</Text>
-								</TouchableOpacity>
-								<View style={styles.indicators}>
-									{optional.scheduled_at && <SymbolView type="monochrome" tintColor={textColor} name="clock" size={16} />}
-									{optional.poll && <SymbolView type="monochrome" tintColor={textColor} name="checklist" size={16} />}
-									{optional.in_reply_to_id && <SymbolView type="monochrome" tintColor={textColor} name="arrowshape.turn.up.left" size={16} />}
-									{optional.quoted_status_id && <SymbolView type="monochrome" tintColor={textColor} name="quote.bubble.fill" size={16} />}
-									<Text>{maxChars - text.length}</Text>
-								</View>
+		<>
+			<KeyboardAvoidingView style={styles.screen} behavior="height" automaticOffset={true}>
+				{initializing ? (
+					<ActivityIndicator />
+				) : acct ? (
+					<View pointerEvents={posting || !client ? 'none' : 'auto'} style={{ height: '100%' }}>
+						<View style={styles.header}>
+							<TouchableOpacity activeOpacity={0.7} onPress={() => changeMode('acct')} style={styles.account}>
+								<Avatar src={acct.avatar || acct.favicon} fallback={acct.sns} size={24} />
+								<Text style={styles.username} numberOfLines={1}>
+									{acct.username}@{acct.domain}
+								</Text>
+							</TouchableOpacity>
+							<View style={styles.indicators}>
+								{optional.scheduled_at && <SymbolView type="monochrome" tintColor={textColor} name="clock" size={16} />}
+								{optional.poll && <SymbolView type="monochrome" tintColor={textColor} name="checklist" size={16} />}
+								{optional.in_reply_to_id && <SymbolView type="monochrome" tintColor={textColor} name="arrowshape.turn.up.left" size={16} />}
+								{optional.quoted_status_id && <SymbolView type="monochrome" tintColor={textColor} name="quote.bubble.fill" size={16} />}
+								<Text>{maxChars - text.length}</Text>
 							</View>
-							{type && <Text>{t(`composer.${type}`)}</Text>}
-							<Composer
-								isOpened={sheet === null}
-								isInSheet={false}
-								acct={acct}
-								client={client}
-								post={post}
-								changeMode={changeMode}
-								textState={{ text, setText }}
-								cwState={{ cw, setCW }}
-								uploadedState={{ uploaded, setUploaded }}
-								visState={{ vis, setVis }}
-							/>
-							{(posting || !client) && <ActivityIndicator />}
 						</View>
-					) : (
-						<Acct change={setAcct} />
-					)}
-				</ScrollView>
+						{type && <Text>{t(`composer.${type}`)}</Text>}
+						<Composer
+							isOpened={sheet === null}
+							isInSheet={false}
+							acct={acct}
+							client={client}
+							post={post}
+							changeMode={changeMode}
+							textState={{ text, setText }}
+							cwState={{ cw, setCW }}
+							uploadedState={{ uploaded, setUploaded }}
+							visState={{ vis, setVis }}
+						/>
+						{(posting || !client) && <ActivityIndicator />}
+					</View>
+				) : (
+					<Acct change={setAcct} />
+				)}
 			</KeyboardAvoidingView>
 			{sheet === 'acct' && (
 				<ModeSheet close={() => closeSheet('acct')}>
@@ -260,8 +259,8 @@ export default function Post() {
 				</ModeSheet>
 			)}
 			{sheet === 'menu' && (
-				<ModeSheet close={() => closeSheet('menu')}>
-					<Menu client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />
+				<ModeSheet close={() => closeSheet('menu')} scrollable={false}>
+					<Menu inSheet={false} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />
 				</ModeSheet>
 			)}
 			{sheet === 'poll' && (
@@ -278,7 +277,7 @@ export default function Post() {
 				</ModeSheet>
 			)}
 			{sheet === 'schedule' && (
-				<ModeSheet close={() => closeSheet('schedule')}>
+				<ModeSheet close={() => closeSheet('schedule')} scrollable={false}>
 					<Schedule
 						defaultSchedule={optional.scheduled_at}
 						changeMode={changeMode}
@@ -289,13 +288,12 @@ export default function Post() {
 					/>
 				</ModeSheet>
 			)}
-		</View>
+		</>
 	)
 }
 
 const styles = StyleSheet.create({
-	screen: { flex: 1, backgroundColor: PlatformColor('systemBackground') },
-	content: { flexGrow: 1, padding: 20 },
+	screen: { flex: 1, backgroundColor: PlatformColor('systemBackground'), padding: 20, paddingBottom: 10, height: '100%' },
 	header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
 	account: { flex: 1, flexDirection: 'row', alignItems: 'center' },
 	username: { flexShrink: 1, fontSize: 16, marginLeft: 10 },
