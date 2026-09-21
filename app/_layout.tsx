@@ -36,12 +36,13 @@ export default function RootLayout() {
 							<Stack.Screen name="acct" options={{ title: t('screen.acct') }} />
 							<Stack.Screen name="detail" options={{ title: t('screen.detail') }} />
 							<Stack.Screen name="onOtherAcct" options={{ title: t('screen.onOtherAcct') }} />
-							<Stack.Screen name="post" options={{ title: t('screen.post') }} />
+							<Stack.Screen name="post" options={{ title: t('screen.post'), presentation: 'modal' }} />
 							<Stack.Screen name="config" options={{ title: t('screen.config') }} />
 							<Stack.Screen name="search" options={{ title: t('screen.search') }} />
 							<Stack.Screen name="tag" options={{ title: t('screen.tag') }} />
 							<Stack.Screen name="copy" options={{ title: t('timeline.action.copyText') }} />
 							<Stack.Screen name="user" options={{ title: '', headerShown: false }} />
+							<Stack.Screen name="handleShare" options={{ title: '', headerShown: false }} />
 						</Stack>
 						<StatusBar style="auto" />
 					</ThemeProvider>

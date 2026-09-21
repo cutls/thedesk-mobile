@@ -1,3 +1,4 @@
+import { Text } from '@/components/themed/Text'
 import type { Account } from '@/entities/account'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import { useConfigStore } from '@/utils/store/config'
@@ -9,6 +10,7 @@ import type { FlashListRef } from '@shopify/flash-list'
 import * as Localization from 'expo-localization'
 import type React from 'react'
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { PlatformColor, ScrollView, StyleSheet, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -23,6 +25,17 @@ interface IProps {
 		relayRef: React.Ref<FlashListRef<any>>
 		setComposeAction: IState<ActionProps | null>
 	}
+}
+const Walkthrough = ({ styles }: { styles: any }) => {
+	const { t } = useTranslation()
+	return (
+		<SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center', height: '100%' }]}>
+			<View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+				<View style={{ height: 20 }} />
+				<Text style={{ textAlign: 'center' }}>{t('timeline.walkthrough')}</Text>
+			</View>
+		</SafeAreaView>
+	)
 }
 export const Columns = ({ context }: IProps) => {
 	const { current, setCurrent, relayRef, setComposeAction } = context
@@ -47,6 +60,8 @@ export const Columns = ({ context }: IProps) => {
 	}, [current])
 
 	const styles = createStyles({ width, height, deviceWidth })
+	if (timelines.length === 0) return <Walkthrough styles={styles} />
+
 	return (
 		<SafeAreaView style={[styles.container]}>
 			{deviceWidth <= 550 ? (
@@ -62,7 +77,12 @@ export const Columns = ({ context }: IProps) => {
 					))}
 				</PagerView>
 			) : (
-				<ScrollView ref={refScroll} horizontal={true} style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'row' }} onScrollBeginDrag={(e) => setCurrent(Math.max(0, Math.floor(e.nativeEvent.contentOffset.x / columnWidth)))}>
+				<ScrollView
+					ref={refScroll}
+					horizontal={true}
+					style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'row' }}
+					onScrollBeginDrag={(e) => setCurrent(Math.max(0, Math.floor(e.nativeEvent.contentOffset.x / columnWidth)))}
+				>
 					{timelines.map((timeline, index) => (
 						<View style={styles.page} key={timeline.id}>
 							{timeline.kind !== 'notifications' && timeline.kind !== 'direct' && (
@@ -71,9 +91,7 @@ export const Columns = ({ context }: IProps) => {
 							{timeline.kind === 'notifications' && (
 								<Notifications timeline={timeline} relayRef={current === index ? relayRef : undefined} composeAction={action} columnWidth={columnWidth} lang={lang} />
 							)}
-							{timeline.kind === 'direct' && (
-								<Conversations timeline={timeline} relayRef={current === index ? relayRef : undefined} composeAction={action} columnWidth={columnWidth} lang={lang} />
-							)}
+							{timeline.kind === 'direct' && <Conversations timeline={timeline} relayRef={current === index ? relayRef : undefined} composeAction={action} columnWidth={columnWidth} lang={lang} />}
 						</View>
 					))}
 				</ScrollView>

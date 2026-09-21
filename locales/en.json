@@ -46,6 +46,7 @@
 		"deleteAccountConfirmTitle": "Delete Account"
     },
     "timeline": {
+		"walkthrough": "Tap the + button on bottom to add your first column.",
         "notification": {
 			"follow": {
 				"title": "Follow",

@@ -91,6 +91,7 @@
 		"edit": "編集モード"
 	},
 	"timeline": {
+		"walkthrough": "画面下部の＋ボタンをタップして、最初のカラムを追加しましょう。",
 		"notification": {
 			"follow": {
 				"title": "フォロー",
