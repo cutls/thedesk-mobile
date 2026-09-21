@@ -11,8 +11,9 @@ import * as Localization from 'expo-localization'
 import type React from 'react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlatformColor, ScrollView, StyleSheet, View } from 'react-native'
+import { type NativeSyntheticEvent, PlatformColor, ScrollView, StyleSheet, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
+import type { OnPageSelectedEventData } from 'react-native-pager-view/lib/typescript/PagerViewNativeComponent'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Conversations } from '../timeline/Conversations'
 import { Notifications } from './Notifications'
@@ -55,7 +56,7 @@ export const Columns = ({ context }: IProps) => {
 	useEffect(() => {
 		if (refPager.current) refPager.current.setPage(current)
 		if (refScroll.current) {
-			refScroll.current.scrollTo({ x: current * columnWidth, animated: true })
+			;(refScroll as any).current.scrollTo({ x: current * columnWidth, animated: true })
 		}
 	}, [current])
 
@@ -65,7 +66,7 @@ export const Columns = ({ context }: IProps) => {
 	return (
 		<SafeAreaView style={[styles.container]}>
 			{deviceWidth <= 550 ? (
-				<PagerView ref={refPager} style={{ height: '100%', width: '100%' }} initialPage={0} onPageSelected={(a) => setCurrent(a.nativeEvent.position)}>
+				<PagerView ref={refPager} style={{ height: '100%', width: '100%' }} initialPage={0} onPageSelected={(a: NativeSyntheticEvent<OnPageSelectedEventData>) => setCurrent(a.nativeEvent.position)}>
 					{timelines.map((timeline, index) => (
 						<View style={styles.page} key={timeline.id}>
 							{timeline.kind !== 'notifications' && timeline.kind !== 'direct' && (
@@ -78,7 +79,7 @@ export const Columns = ({ context }: IProps) => {
 				</PagerView>
 			) : (
 				<ScrollView
-					ref={refScroll}
+					ref={refScroll as any}
 					horizontal={true}
 					style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'row', marginTop: 10 }}
 					onScrollBeginDrag={(e) => setCurrent(Math.max(0, Math.floor(e.nativeEvent.contentOffset.x / columnWidth)))}
