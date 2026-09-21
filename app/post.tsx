@@ -14,8 +14,7 @@ import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodo
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
 import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
-import { router, useLocalSearchParams } from 'expo-router'
-import { useHeaderHeight } from 'expo-router/react-navigation'
+import { router, useLocalSearchParams, usePreventRemove } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +30,7 @@ interface PostParams {
 	addImage?: string //  JSON
 	statusId?: string
 	visibility?: ActionProps['visibility']
+	fromShare?: 'true'
 }
 interface PostOptions {
 	scheduled_at?: string
@@ -69,11 +69,9 @@ function ModeSheet({ children, close, scrollable = true }: { children: ReactNode
 }
 
 export default function Post() {
-	const { mode: type, acctId, targetId, addText: encodedText, addImage: addImageRaw, statusId, visibility } = useLocalSearchParams() as unknown as PostParams
+	const { mode: type, acctId, targetId, addText: encodedText, addImage: addImageRaw, statusId, visibility, fromShare } = useLocalSearchParams() as unknown as PostParams
 	const addImage = addImageRaw ? JSON.parse(addImageRaw) : undefined
 	const { t } = useTranslation()
-	const insets = useSafeAreaInsets()
-	const headerHeight = useHeaderHeight()
 	const [acct, setAcct] = useState<Account | null>(null)
 	const [client, setClient] = useState<MegalodonInterface | null>(null)
 	const [sheet, setSheet] = useState<SheetMode | null>(null)
@@ -88,6 +86,9 @@ export default function Post() {
 	const [posting, setPosting] = useState(false)
 	const submitting = useRef(false)
 	const textColor = PlatformColor('label')
+	const isUnsavedChange = !!text || !!cw || uploaded.length > 0 || !!optional.poll || !!optional.scheduled_at
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(isUnsavedChange)
+	useEffect(() => setHasUnsavedChanges(isUnsavedChange), [isUnsavedChange])
 
 	useEffect(() => {
 		let cancelled = false
@@ -104,9 +105,7 @@ export default function Post() {
 				if (addImage) {
 					console.log('addImage', addImage)
 					for (const image of addImage) {
-						console.log(image)
 						const response = await fetch(image)
-						console.log('response', response)
 						const uuid = randomUUID()
 						const blob = await response.blob()
 						const result = await api.uploadMedia({
@@ -186,7 +185,11 @@ export default function Post() {
 			const data = { ...options, spoiler_text: cw || undefined, visibility: vis, media_ids: uploaded.map((attachment) => attachment.id) }
 			if (editTargetId) await client.editStatus(editTargetId, { status: text, ...data })
 			else await client.postStatus(text, data)
-			router.back()
+			if (fromShare) {
+				router.replace('/')
+			} else {
+				router.back()
+			}
 		} catch (error) {
 			Alert.alert(t('screen.post'), String(error))
 		} finally {
@@ -194,47 +197,62 @@ export default function Post() {
 			setPosting(false)
 		}
 	}
+	usePreventRemove(hasUnsavedChanges, ({ repeat }) => {
+		Alert.alert(t('composer.unsavedChanges.title'), t('composer.unsavedChanges.message'), [
+			{ text: t('composer.unsavedChanges.keepEditing'), style: 'cancel' },
+			{
+				text: t('composer.unsavedChanges.discard'),
+				style: 'destructive',
+				onPress: () => {
+					setHasUnsavedChanges(false)
+					repeat()
+				}
+			}
+		])
+	})
 
 	return (
 		<>
-			<KeyboardAvoidingView style={styles.screen} behavior="height" automaticOffset={true}>
-				{initializing ? (
-					<ActivityIndicator />
-				) : acct ? (
-					<View pointerEvents={posting || !client ? 'none' : 'auto'} style={{ height: '100%' }}>
-						<View style={styles.header}>
-							<TouchableOpacity activeOpacity={0.7} onPress={() => changeMode('acct')} style={styles.account}>
-								<Avatar src={acct.avatar || acct.favicon} fallback={acct.sns} size={24} />
-								<Text style={styles.username} numberOfLines={1}>
-									{acct.username}@{acct.domain}
-								</Text>
-							</TouchableOpacity>
-							<View style={styles.indicators}>
-								{optional.scheduled_at && <SymbolView type="monochrome" tintColor={textColor} name="clock" size={16} />}
-								{optional.poll && <SymbolView type="monochrome" tintColor={textColor} name="checklist" size={16} />}
-								{optional.in_reply_to_id && <SymbolView type="monochrome" tintColor={textColor} name="arrowshape.turn.up.left" size={16} />}
-								{optional.quoted_status_id && <SymbolView type="monochrome" tintColor={textColor} name="quote.bubble.fill" size={16} />}
-								<Text>{maxChars - text.length}</Text>
+			<KeyboardAvoidingView behavior="height" style={{ flex: 1 }} automaticOffset={true}>
+				<GlassView style={styles.screen}>
+					{initializing ? (
+						<ActivityIndicator />
+					) : acct ? (
+						<View pointerEvents={posting || !client ? 'none' : 'auto'} style={{ height: '100%' }}>
+							<View style={styles.header}>
+								<TouchableOpacity activeOpacity={0.7} onPress={() => changeMode('acct')} style={styles.account}>
+									<Avatar src={acct.avatar || acct.favicon} fallback={acct.sns} size={24} />
+									<Text style={styles.username} numberOfLines={1}>
+										{acct.username}@{acct.domain}
+									</Text>
+								</TouchableOpacity>
+								<View style={styles.indicators}>
+									{optional.scheduled_at && <SymbolView type="monochrome" tintColor={textColor} name="clock" size={16} />}
+									{optional.poll && <SymbolView type="monochrome" tintColor={textColor} name="checklist" size={16} />}
+									{optional.in_reply_to_id && <SymbolView type="monochrome" tintColor={textColor} name="arrowshape.turn.up.left" size={16} />}
+									{optional.quoted_status_id && <SymbolView type="monochrome" tintColor={textColor} name="quote.bubble.fill" size={16} />}
+									<Text>{maxChars - text.length}</Text>
+								</View>
 							</View>
+							{type && <Text>{t(`composer.${type}`)}</Text>}
+							<Composer
+								isOpened={sheet === null}
+								isInSheet={false}
+								acct={acct}
+								client={client}
+								post={post}
+								changeMode={changeMode}
+								textState={{ text, setText }}
+								cwState={{ cw, setCW }}
+								uploadedState={{ uploaded, setUploaded }}
+								visState={{ vis, setVis }}
+							/>
+							{(posting || !client) && <ActivityIndicator />}
 						</View>
-						{type && <Text>{t(`composer.${type}`)}</Text>}
-						<Composer
-							isOpened={sheet === null}
-							isInSheet={false}
-							acct={acct}
-							client={client}
-							post={post}
-							changeMode={changeMode}
-							textState={{ text, setText }}
-							cwState={{ cw, setCW }}
-							uploadedState={{ uploaded, setUploaded }}
-							visState={{ vis, setVis }}
-						/>
-						{(posting || !client) && <ActivityIndicator />}
-					</View>
-				) : (
-					<Acct change={setAcct} />
-				)}
+					) : (
+						<Acct change={setAcct} />
+					)}
+				</GlassView>
 			</KeyboardAvoidingView>
 			{sheet === 'acct' && (
 				<ModeSheet close={() => closeSheet('acct')}>
@@ -293,7 +311,7 @@ export default function Post() {
 }
 
 const styles = StyleSheet.create({
-	screen: { flex: 1, backgroundColor: PlatformColor('systemBackground'), padding: 20, paddingBottom: 10, height: '100%' },
+	screen: { flex: 1, backgroundColor: 'transparent', padding: 20, paddingBottom: 10, height: '100%' },
 	header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
 	account: { flex: 1, flexDirection: 'row', alignItems: 'center' },
 	username: { flexShrink: 1, fontSize: 16, marginLeft: 10 },

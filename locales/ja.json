@@ -52,6 +52,12 @@
 		"cwPlaceholder": "閲覧注意(オプション)",
 		"discard": "下書きを破棄",
 		"discardConfirm": "下書きを破棄してもよろしいですか？",
+		"unsavedChanges": {
+			"title": "変更を破棄しますか？",
+			"message": "変更は保存されていません。",
+			"keepEditing": "編集を続ける",
+			"discard": "破棄"
+		},
 		"vis": {
 			"public": "公開",
 			"unlisted": "未収載",
@@ -170,6 +176,7 @@
 			"showMoreAuto": "もっと見る(長い)",
 			"showLess": "隠す",
 			"mediaHidden": "非表示のメディア",
+			"downloadComplete": "ダウンロード完了",
 			"pinnedPost": "ピン留めされた投稿",
 			"filtered": "フィルターされました",
 			"showAnyway": "表示する",

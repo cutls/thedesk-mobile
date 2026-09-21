@@ -38,9 +38,9 @@ export default function ShareReceived() {
 			pathname: '/post',
 			params: {
 				acctId: account.id,
-				// post.tsx decodes this field after Expo Router reads the params.
 				addText: text ? encodeURIComponent(text) : undefined,
-				addImage: images.length > 0 ? JSON.stringify(images) : undefined
+				addImage: images.length > 0 ? JSON.stringify(images) : undefined,
+				fromShare: 'true'
 			}
 		})
 	}

@@ -7,7 +7,7 @@ import { SymbolView } from 'expo-symbols'
 import { openBrowserAsync } from 'expo-web-browser'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { Alert, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 
 type IConfig = Settings['timeline']
@@ -53,7 +53,13 @@ export const Attachment = (props: IProps) => {
 		<Galeria
 			urls={galeriaList}
 			actions={[
-				{ icon: 'download', onPress: (index) => downloadImage(galeriaList[index]) },
+				{
+					icon: 'download',
+					onPress: async (index) => {
+						await downloadImage(galeriaList[index])
+						Alert.alert(t('timeline.status.downloadComplete'))
+					}
+				},
 				{ icon: 'share', onPress: (index) => openBrowserAsync(galeriaList[index]) }
 			]}
 		>

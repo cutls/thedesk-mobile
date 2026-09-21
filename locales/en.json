@@ -125,6 +125,7 @@
 			"showMoreAuto": "Show more(long)",
 			"showLess": "Hide",
 			"mediaHidden": "Media hidden",
+			"downloadComplete": "Download Complete",
 			"pinnedPost": "Pnned post",
 			"filtered": "Filtered",
 			"showAnyway": "Show anyway",
@@ -193,6 +194,12 @@
         "deleteAttachmentConfirm": "Are you sure you want to delete this attachment?",
 		"discard": "Discard draft",
 		"discardConfirm": "Are you sure you want to discard the draft?",
+		"unsavedChanges": {
+			"title": "Discard changes?",
+			"message": "Your changes have not been saved.",
+			"keepEditing": "Keep editing",
+			"discard": "Discard"
+		},
         "vis": {
             "public": "Public",
             "unlisted": "Unlisted",
