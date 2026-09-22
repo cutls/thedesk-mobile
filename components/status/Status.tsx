@@ -3,7 +3,7 @@ import { ja } from 'date-fns/locale'
 import { SymbolView } from 'expo-symbols'
 import { onTranslateSheet } from 'expo-translate-text'
 import { useRef, useState } from 'react'
-import { ActivityIndicator, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { ActivityIndicator, PixelRatio, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import Avatar from '../Avatar'
 import { Text } from '../themed/Text'
 import { AccountName } from './AccountName'
@@ -62,6 +62,7 @@ export const Status = (props: IProps) => {
 	const { status: statusRaw, client, columnWidth, lang, updateStatus, acct, composeAction, filters } = props
 	const status = statusRaw.reblog ? statusRaw.reblog : statusRaw
 	const isMe = acct.username === status.account.acct
+	const fontScale = Math.min(PixelRatio.getFontScale(), 2)
 	const { t } = useTranslation()
 	const theme = useColorScheme()
 	const router = useRouter()
@@ -78,7 +79,7 @@ export const Status = (props: IProps) => {
 	const fontSize = 14
 	const showGif = props.config.animation === 'yes'
 	const showCount = true
-	const avatarSize = 45
+	const avatarSize = 45 * fontScale
 	const left = avatarSize + 25
 	const [isFiltered, setIsFiltered] = useState(filters.some((f) => status.content.includes(f.phrase) || status.spoiler_text.includes(f.phrase)))
 	const isCWA = status.spoiler_text.length > 0
@@ -181,7 +182,7 @@ export const Status = (props: IProps) => {
 						</Link.Trigger>
 					</Link>
 					<View style={{ marginTop: 2 }} />
-					<SymbolView name={data.find((d) => d.value === status.visibility)?.systemImage || 'questionmark'} size={12} type="monochrome" tintColor={PlatformColor('systemGray')} />
+					<SymbolView name={data.find((d) => d.value === status.visibility)?.systemImage || 'questionmark'} size={12 * fontScale} type="monochrome" tintColor={PlatformColor('systemGray')} />
 					<View style={{ marginTop: 2 }} />
 					{isProcessing && <ActivityIndicator size="small" />}
 				</View>
@@ -225,22 +226,22 @@ export const Status = (props: IProps) => {
 					{status.poll || status.quote_status || status.card || status.media_attachments.length > 0 ? <View style={{ height: 10 }} /> : null}
 					<View style={{ display: 'flex', flexDirection: 'row', marginBottom: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
 						<TouchableOpacity style={styles.action} onPress={() => composeAction(client, acct, 'reply', status)}>
-							<SymbolView name="bubble" type="monochrome" tintColor={actionColor} size={fontSize * 1.2} />
+							<SymbolView name="bubble" type="monochrome" tintColor={actionColor} size={fontSize * 1.2 * fontScale} />
 							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.replies_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('bt')}>
-							<SymbolView name="repeat" type="monochrome" tintColor={status.reblogged ? PlatformColor('systemBlue') : actionColor} size={fontSize * 1.2} />
+							<SymbolView name="repeat" type="monochrome" tintColor={status.reblogged ? PlatformColor('systemBlue') : actionColor} size={fontSize * 1.2 * fontScale} />
 							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.reblogs_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('fav')}>
-							<SymbolView name={status.favourited ? 'star.fill' : 'star'} type="monochrome" tintColor={status.favourited ? PlatformColor('systemYellow') : actionColor} size={fontSize * 1.2} />
+							<SymbolView name={status.favourited ? 'star.fill' : 'star'} type="monochrome" tintColor={status.favourited ? PlatformColor('systemYellow') : actionColor} size={fontSize * 1.2 * fontScale} />
 							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.favourites_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('bookmark')}>
-							<SymbolView name={status.bookmarked ? 'bookmark.fill' : 'bookmark'} type="monochrome" tintColor={status.bookmarked ? PlatformColor('systemRed') : actionColor} size={fontSize * 1.2} />
+							<SymbolView name={status.bookmarked ? 'bookmark.fill' : 'bookmark'} type="monochrome" tintColor={status.bookmarked ? PlatformColor('systemRed') : actionColor} size={fontSize * 1.2 * fontScale} />
 						</TouchableOpacity>
 						<Dropdown data={otherAction} onSelect={(title) => dropdown(title)} modifiers={[ignoreSafeArea({ regions: 'all' })]}>
-							<SymbolView name="ellipsis" tintColor={actionColor} type="monochrome" size={fontSize * 1.2} />
+							<SymbolView name="ellipsis" tintColor={actionColor} type="monochrome" size={fontSize * 1.2 * fontScale} />
 						</Dropdown>
 					</View>
 				</View>

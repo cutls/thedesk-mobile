@@ -19,9 +19,10 @@ const renderers = {
 		contentModel: HTMLContentModel.mixed
 	})
 }
-export const RenderHTML = React.memo(({ status, fontSize, showGif, txtColor, columnWidth, left, handleLink }: RenderHTMLProps) => (
-	<HTML
-		source={{ html: `${emojify(status.content, status.emojis, fontSize * 0.8, showGif)}` }}
+export const RenderHTML = React.memo(({ status, fontSize, showGif, txtColor, columnWidth, left, handleLink }: RenderHTMLProps) => {
+	const statusContent = status.content.match(/^<p.+\/p>$/) ? status.content : `<p>${status.content}</p>`
+	return <HTML
+		source={{ html: `${emojify(statusContent, status.emojis, fontSize * 0.8, showGif)}` }}
 		tagsStyles={{ p: { color: txtColor, marginBottom: 15 }, a: { color: PlatformColor('link') } }}
 		customHTMLElementModels={renderers}
 		contentWidth={columnWidth - left}
@@ -36,7 +37,7 @@ export const RenderHTML = React.memo(({ status, fontSize, showGif, txtColor, col
 		defaultViewProps={{ style: { width: columnWidth - left } }}
 		renderersProps={{ a: { onPress: (e, href) => handleLink(href) } }}
 	/>
-))
+})
 
 export const RenderSimpleHTML = React.memo(({ text, txtColor }: { text: string; txtColor: string }) => (
 	<HTML
