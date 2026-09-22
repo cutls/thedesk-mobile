@@ -277,8 +277,22 @@
 		"tag": "Tag",
 		"user": "User",
 		"post": "Post",
-		"placeholder": "Search for users, tags, or posts",
-		"search": "Search"
+		"placeholder": "Search people, tags, and posts",
+		"search": "Search",
+		"loading": "Loading",
+		"unavailable": "This server’s results are unavailable right now.",
+		"noTrends": "No trends to show here yet.",
+		"noResults": "No matches. Try a different search.",
+		"retry": "Try again",
+		"clear": "Clear search and show trends",
+		"accountRequired": "Choose an account to discover what’s happening on your server.",
+		"chooseAccount": "Choose an account",
+		"trendingNow": "Trending now",
+		"viewConversation": "Explore this tag",
+		"dailyPosts_one": "{{formatted}} post in the latest day",
+		"dailyPosts_other": "{{formatted}} posts in the latest day",
+		"peopleToDiscover": "People to discover",
+		"popularPosts": "Popular posts"
 	},
 	"navigation": {
 		"config": {

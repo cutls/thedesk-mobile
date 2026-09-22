@@ -190,7 +190,7 @@ export default function Index() {
 		<KeyboardAvoidingView
 			behavior="padding"
 			keyboardVerticalOffset={headerHeight}
-			style={[styles.container, { paddingBottom: Math.max(insets.bottom, 20) }]}
+			style={[styles.container]}
 		>
 			<View pointerEvents="none" style={StyleSheet.absoluteFill}>
 				<Image source={image} style={[styles.glow, { display: image ? 'flex' : 'none' }]} contentFit="cover" />

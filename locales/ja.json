@@ -278,7 +278,20 @@
 		"user": "ユーザー",
 		"post": "投稿",
 		"placeholder": "ユーザー、タグ、投稿を検索",
-		"search": "検索"
+		"search": "検索",
+		"loading": "読み込み中",
+		"unavailable": "現在、このサーバーの結果を取得できません。",
+		"noTrends": "まだトレンドはありません。",
+		"noResults": "見つかりませんでした。別のキーワードで検索してください。",
+		"retry": "再試行",
+		"clear": "検索をクリアしてトレンドを表示",
+		"accountRequired": "アカウントを選んで、サーバーで話題のトピックを見つけましょう。",
+		"chooseAccount": "アカウントを選択",
+		"trendingNow": "いま話題のタグ",
+		"viewConversation": "このタグを見る",
+		"dailyPosts": "直近1日で {{formatted}} 件の投稿",
+		"peopleToDiscover": "注目のユーザー",
+		"popularPosts": "話題の投稿"
 	},
 	"navigation": {
 		"config": {
