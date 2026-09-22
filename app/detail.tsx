@@ -23,8 +23,8 @@ const SimpleStatus = ({ status, acctId, isBefore }: { status: Entity.Status; acc
 	const { width } = useWindowSize()
 	const { config } = useConfigStore()
 	const isAnimation = config.timeline.animation === 'yes'
-	const beforeBorder = { borderBottomWidth: 1, borderBottomColor: PlatformColor('separator') }
-	const afterBorder = { borderTopWidth: 1, borderTopColor: PlatformColor('separator') }
+	const beforeBorder = { borderBottomWidth: 1, borderBottomColor: PlatformColor('separator'), borderLeftWidth: 5, borderLeftColor: PlatformColor('systemGreen')}
+	const afterBorder = { borderTopWidth: 1, borderTopColor: PlatformColor('separator'), borderLeftWidth: 5, borderLeftColor: PlatformColor('systemOrange') }
 	return (
 		<Link href={`/detail?acctId=${acctId}&statusId=${status.id}`} push>
 			<Link.Preview style={{ backgroundColor: PlatformColor('systemBackground') }} />
@@ -73,7 +73,6 @@ export default function Index() {
 				const statusExtended: StatusExtended = { ...d.data, isMain: true }
 				const context = await client.getStatusContext(statusId)
 				setStatuses([...context.data.ancestors.map((t) => ({ ...t, isBefore: true })), statusExtended, ...context.data.descendants])
-
 			} finally {
 				setIsLoading(false)
 			}
