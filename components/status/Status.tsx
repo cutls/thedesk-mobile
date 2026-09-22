@@ -69,6 +69,7 @@ export const Status = (props: IProps) => {
 	const [isProcessing, setIsProcessing] = useState(false)
 	const isDark = theme === 'dark'
 	const txtColor = isDark ? 'white' : 'black'
+	const actionColor = isDark ? PlatformColor('systemGray2') : PlatformColor('systemGray')
 	const styles = createStyles({ width: columnWidth })
 	const [isOpen, setIsOpen] = useState(false)
 	const locale = lang === 'ja' ? ja : undefined
@@ -194,7 +195,7 @@ export const Status = (props: IProps) => {
 							</Text>
 						</View>
 						<TouchableOpacity onPress={() => router.push(`/detail?acctId=${acct.id}&statusId=${status.id}`)} activeOpacity={0.7}>
-							<Text numberOfLines={1} style={{ color: PlatformColor('systemGray'), textAlign: 'right', width: 50, fontSize: 10 }}>
+							<Text numberOfLines={1} style={{ color: PlatformColor('systemGray'), textAlign: 'right', width: 50, fontSize: 12 }}>
 								{fromNow}
 							</Text>
 						</TouchableOpacity>
@@ -224,22 +225,22 @@ export const Status = (props: IProps) => {
 					{status.poll || status.quote_status || status.card || status.media_attachments.length > 0 ? <View style={{ height: 10 }} /> : null}
 					<View style={{ display: 'flex', flexDirection: 'row', marginBottom: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
 						<TouchableOpacity style={styles.action} onPress={() => composeAction(client, acct, 'reply', status)}>
-							<SymbolView name="arrowshape.turn.up.left" type="monochrome" tintColor={txtColor} size={fontSize * 1.2} />
-							<Text style={{ marginLeft: 5 }}>{showCount ? status.replies_count.toLocaleString() : ''}</Text>
+							<SymbolView name="bubble" type="monochrome" tintColor={actionColor} size={fontSize * 1.2} />
+							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.replies_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('bt')}>
-							<SymbolView name="repeat" type="monochrome" tintColor={status.reblogged ? PlatformColor('systemBlue') : txtColor} size={fontSize * 1.2} />
-							<Text style={{ marginLeft: 5 }}>{showCount ? status.reblogs_count.toLocaleString() : ''}</Text>
+							<SymbolView name="repeat" type="monochrome" tintColor={status.reblogged ? PlatformColor('systemBlue') : actionColor} size={fontSize * 1.2} />
+							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.reblogs_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('fav')}>
-							<SymbolView name={status.favourited ? 'star.fill' : 'star'} type="monochrome" tintColor={status.favourited ? PlatformColor('systemYellow') : txtColor} size={fontSize * 1.2} />
-							<Text style={{ marginLeft: 5 }}>{showCount ? status.favourites_count.toLocaleString() : ''}</Text>
+							<SymbolView name={status.favourited ? 'star.fill' : 'star'} type="monochrome" tintColor={status.favourited ? PlatformColor('systemYellow') : actionColor} size={fontSize * 1.2} />
+							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.favourites_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('bookmark')}>
-							<SymbolView name={status.bookmarked ? 'bookmark.fill' : 'bookmark'} type="monochrome" tintColor={status.bookmarked ? PlatformColor('systemRed') : txtColor} size={fontSize * 1.2} />
+							<SymbolView name={status.bookmarked ? 'bookmark.fill' : 'bookmark'} type="monochrome" tintColor={status.bookmarked ? PlatformColor('systemRed') : actionColor} size={fontSize * 1.2} />
 						</TouchableOpacity>
 						<Dropdown data={otherAction} onSelect={(title) => dropdown(title)} modifiers={[ignoreSafeArea({ regions: 'all' })]}>
-							<SymbolView name="ellipsis" tintColor={txtColor} type="monochrome" size={fontSize * 1.2} />
+							<SymbolView name="ellipsis" tintColor={actionColor} type="monochrome" size={fontSize * 1.2} />
 						</Dropdown>
 					</View>
 				</View>

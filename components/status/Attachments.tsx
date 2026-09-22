@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
 	},
 	common: {
 		backgroundColor: PlatformColor('systemGray'),
-		borderRadius: 5,
+		borderRadius: 10,
 		borderWidth: 1,
 		borderColor: PlatformColor('systemGray4')
 	}
