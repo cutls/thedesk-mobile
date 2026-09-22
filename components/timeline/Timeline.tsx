@@ -18,7 +18,7 @@ import generator from '@cutls/megalodon'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
 import { useFocusEffect } from 'expo-router'
 import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, AppState, type AppStateStatus, PlatformColor, RefreshControl, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Status } from '../status/Status'
@@ -50,6 +50,7 @@ export const Timeline = (props: IProps) => {
 	const [isInitiated, setIsInitiated] = useState(false)
 	const [isRefreshing, setIsRefreshing] = useState(false)
 	const [maxId, setMaxId] = useState<string | null>(null)
+	const scrollOffset = useRef(0)
 	const isStreaming = false
 	const updateStatus = (newStatus: Entity.Status | null, deleteId?: string) => {
 		if (newStatus === null) setStatuses((prevStatuses) => prevStatuses.filter((s) => s.id !== deleteId))
@@ -164,7 +165,7 @@ export const Timeline = (props: IProps) => {
 	}
 	useEffect(() => {
 		const _handleAppStateChange = async (nextAppState: AppStateStatus) => {
-			if (nextAppState === 'active') load(false, true)
+			if (nextAppState === 'active') load(scrollOffset.current < 100, true)
 		}
 		const e = AppState.addEventListener('change', _handleAppStateChange)
 		return () => e.remove()
@@ -197,6 +198,10 @@ export const Timeline = (props: IProps) => {
 			data={statuses}
 			keyExtractor={(item) => item.id}
 			ref={relayRef}
+			onScroll={(event) => {
+				scrollOffset.current = event.nativeEvent.contentOffset.y
+			}}
+			scrollEventThrottle={16}
 			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true, false)} />}
 			ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
 			renderItem={({ item: status }) => (
