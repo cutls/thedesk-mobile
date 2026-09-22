@@ -15,6 +15,7 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, BottomSheetVie
 import { useHeaderHeight } from '@react-navigation/elements'
 import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
+import * as Haptics from 'expo-haptics'
 import { router, useLocalSearchParams, usePreventRemove } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
@@ -193,6 +194,7 @@ export default function Post() {
 			} else {
 				router.back()
 			}
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 		} catch (error) {
 			Alert.alert(t('screen.post'), String(error))
 		} finally {

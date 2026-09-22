@@ -2,7 +2,7 @@ import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import { ja } from 'date-fns/locale'
 import { SymbolView } from 'expo-symbols'
 import { onTranslateSheet } from 'expo-translate-text'
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActivityIndicator, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import Avatar from '../Avatar'
 import { Text } from '../themed/Text'
@@ -15,6 +15,7 @@ import { stripTags } from '@/utils/string'
 import { calcFromNow } from '@/utils/timeline'
 import { ignoreSafeArea } from '@expo/ui/swift-ui/modifiers'
 import * as Clipboard from 'expo-clipboard'
+import * as Haptics from 'expo-haptics'
 import { Link, useRouter } from 'expo-router'
 import { openBrowserAsync } from 'expo-web-browser'
 import { useTranslation } from 'react-i18next'
@@ -93,6 +94,7 @@ export const Status = (props: IProps) => {
 			else if (type === 'bookmark' && !status.bookmarked) response = await client.bookmarkStatus(status.id)
 			else if (type === 'bookmark' && status.bookmarked) response = await client.unbookmarkStatus(status.id)
 			const newStatus = response.data as Entity.Status
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 			updateStatus(newStatus.reblog || newStatus)
 		} finally {
 			setIsProcessing(false)
@@ -133,7 +135,8 @@ export const Status = (props: IProps) => {
 		if (d === 'onOtherAcct') router.push(`/onOtherAcct?acctId=${acct.id}&statusId=${status.id}`)
 		if (d === 'copyUrl') {
 			const url = status.url || ''
-			Clipboard.setUrlAsync(url)
+			await Clipboard.setUrlAsync(url)
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 		}
 		if (d === 'openInBrowser') {
 			const url = status.url || ''

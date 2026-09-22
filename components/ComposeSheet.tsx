@@ -5,6 +5,7 @@ import { confirmDialog, CONTINUE } from '@/utils/alert'
 import { getAcctById, getUsualAcct } from '@/utils/storage'
 import type { ActionProps, ComposeMode } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
+import * as Haptics from 'expo-haptics'
 import { SymbolView } from 'expo-symbols'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -97,6 +98,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 			}
 			clear()
 			close()
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 		} finally {
 			setMode('compose')
 		}

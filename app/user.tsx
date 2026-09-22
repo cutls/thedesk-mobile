@@ -23,6 +23,7 @@ import { Host, Picker, Text as SwiftUIText } from '@expo/ui/swift-ui'
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { BlurView } from 'expo-blur'
 import { GlassView } from 'expo-glass-effect'
+import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
 import * as Linking from 'expo-linking'
 import * as Localization from 'expo-localization'
@@ -122,7 +123,7 @@ export default function Index() {
 		)
 	}
 	return (
-		<>
+		<View style={{ flex: 1 }}>
 			<View style={{ position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center', height: 100, justifyContent: 'center', zIndex: 5 }}>
 				<View
 					style={{
@@ -227,9 +228,10 @@ export default function Index() {
 				<Host style={{ height: 50, backgroundColor: isDark ? '#111' : '#fff' }}>
 					<Picker
 						modifiers={[pickerStyle('segmented')]}
-						label="Select a fruit"
+						label="Post, Follows, Followers"
 						selection={page}
 						onSelectionChange={(selection) => {
+							Haptics.selectionAsync()
 							setPage(selection)
 						}}
 					>
@@ -255,13 +257,21 @@ export default function Index() {
 						<ProfileUsers type="followers" lang={lang} targetId={basic.id} client={client} acct={acct} columnWidth={width} />
 					</View>
 				)}
-				{client && relation && <RelationSheet locked={basic.locked} isOpened={rSheet} setIsOpened={setRSheet} update={() => updateRelation()} client={client} relation={relation} targetId={userId} />}
 			</ScrollView>
-		</>
+			{client && relation && (
+				<View pointerEvents="box-none" style={styles.sheetOverlay}>
+					<RelationSheet locked={basic.locked} isOpened={rSheet} setIsOpened={setRSheet} update={updateRelation} client={client} relation={relation} targetId={userId} />
+				</View>
+			)}
+		</View>
 	)
 }
 const createStyles = ({ width }: { width: number }) =>
 	StyleSheet.create({
+		sheetOverlay: {
+			...StyleSheet.absoluteFill,
+			zIndex: 10
+		},
 		headerWrap: {
 			width: width,
 			height: 300

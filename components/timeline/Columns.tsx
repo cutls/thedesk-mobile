@@ -7,6 +7,7 @@ import { getAllMentions, getSourceText } from '@/utils/timeline'
 import type { ActionProps, IState } from '@/utils/type'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import type { FlashListRef } from '@shopify/flash-list'
+import * as Haptics from 'expo-haptics'
 import * as Localization from 'expo-localization'
 import type React from 'react'
 import { useEffect, useRef } from 'react'
@@ -66,7 +67,10 @@ export const Columns = ({ context }: IProps) => {
 	return (
 		<SafeAreaView style={[styles.container]}>
 			{deviceWidth <= 550 ? (
-				<PagerView ref={refPager} style={{ height: '100%', width: '100%' }} initialPage={0} onPageSelected={(a: NativeSyntheticEvent<OnPageSelectedEventData>) => setCurrent(a.nativeEvent.position)}>
+				<PagerView ref={refPager} style={{ height: '100%', width: '100%' }} initialPage={0} onPageSelected={(a: NativeSyntheticEvent<OnPageSelectedEventData>) => {
+					setCurrent(a.nativeEvent.position)
+					Haptics.selectionAsync()
+				}}>
 					{timelines.map((timeline, index) => (
 						<View style={styles.page} key={timeline.id}>
 							{timeline.kind !== 'notifications' && timeline.kind !== 'direct' && (

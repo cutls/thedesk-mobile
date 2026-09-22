@@ -4,10 +4,11 @@ import { getAcctById } from '@/utils/storage'
 import { stripTags } from '@/utils/string'
 import generator from '@cutls/megalodon'
 import * as Clipboard from 'expo-clipboard'
+import * as Haptics from 'expo-haptics'
 import { useLocalSearchParams } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, PlatformColor, ScrollView, TextInput, useColorScheme } from 'react-native'
+import { ActivityIndicator, PlatformColor, ScrollView, TextInput, useColorScheme } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Index() {
@@ -53,7 +54,7 @@ export default function Index() {
 		textAreaCurrent?.focus()
 		textAreaCurrent?.setSelection(0, text.length)
 		await Clipboard.setStringAsync(text)
-		Alert.alert(t('timeline.action.copied'))
+		Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 	}
 	if (isLoading || !text) {
 		return (
