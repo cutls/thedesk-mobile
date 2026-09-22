@@ -66,7 +66,7 @@ export default function TimelineConfig({ isOpened, setIsOpened, timeline, notifi
 	}
 	const openNotifications = () => {
 		setIsOpened(false)
-		router.push({ pathname: '/notifications', params: { acctId: timeline.acctId } })
+		router.push({ pathname: '/notification', params: { acctId: timeline.acctId } })
 	}
 	// useEffect(() => {
 	// 	(keyboardRef.current as any)?.focus()
