@@ -16,6 +16,7 @@ import { ActivityIndicator, FlatList, InputAccessoryView, PlatformColor, StyleSh
 import { Text } from '../themed/Text'
 import { Button, IconButton } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
+import { TransView } from '../ui/TransView'
 interface Props {
 	textState: { text: string; setText: IState<string> }
 	cwState: { cw: string; setCW: IState<string> }
@@ -60,6 +61,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 	const [selection, setSelection] = useState({ start: 0, end: 0 })
 	const [deleteTxt, setDeleteTxt] = useState('')
 	const [uploading, setUploading] = useState(0)
+	const WrapView = isInSheet ? TransView : View
 	const uploadStatus = (i: number) => setUploading(i)
 	const upload = async (result: Entity.Attachment | Entity.AsyncAttachment) => setUploaded((prev) => [...prev, result])
 	const deleteItem = async (id: string) => {
@@ -114,7 +116,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 		main()
 	}, [selection])
 	return (
-		<View style={{ flexDirection: 'column', flexGrow: 1, flexShrink: 1 }}>
+		<WrapView style={{ flexDirection: 'column', flexGrow: 1, flexShrink: 1 }}>
 			<View style={{ flexDirection: 'row', marginBottom: 5, justifyContent: 'flex-end' }}>
 				{uploaded.map((a) => (
 					<TouchableOpacity activeOpacity={0.7} key={a.id} onPress={() => deleteItem(a.id)}>
@@ -131,7 +133,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 				))}
 			</View>
 			{isCW && (
-				<View style={styles.cwWrap}>
+				<TransView style={styles.cwWrap}>
 					<TextInputCustom
 						isInSheet={isInSheet}
 						value={cw}
@@ -141,7 +143,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 						placeholder={t('composer.cwPlaceholder')}
 						placeholderTextColor={isDark ? 'lightgray' : 'gray'}
 					/>
-				</View>
+				</TransView>
 			)}
 			<TextInputCustom
 				value={text}
@@ -183,7 +185,7 @@ export default function Composer({ acct, post, changeMode, textState, cwState, u
 					{t('composer.post')}
 				</Button>
 			</View>
-		</View>
+		</WrapView>
 	)
 }
 const createStyles = ({ width }: { width: number }) =>

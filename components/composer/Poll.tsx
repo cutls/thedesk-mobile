@@ -1,13 +1,14 @@
 import type { Poll as IPoll } from '@/entities/status'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import type { ComposeMode } from '@/utils/type'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlatformColor, StyleSheet, Switch, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 import { TextInputMulti } from '../themed/TextInputMulti'
 import { Button } from '../ui/Button'
 import { Dropdown } from '../ui/Dropdown'
+import { TransView } from '../ui/TransView'
 
 interface Props {
 	changeMode: (m: ComposeMode) => void
@@ -86,16 +87,16 @@ export default function Poll({ changeMode, addPoll, defaultPoll, maxPollsOptions
 				</Button>
 			</View>
 			{optionMenu && (
-				<View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+				<TransView style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
 					<Text>{t('composer.poll.multiple')}</Text>
 					<Switch value={isMultiple} onValueChange={(v) => setIsMultiple(v)} />
-				</View>
+				</TransView>
 			)}
 			{optionMenu && (
-				<View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
+				<TransView style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
 					<Text>{t('composer.poll.hideTotals')}</Text>
 					<Switch value={hideTotals} onValueChange={(v) => setHideTotals(v)} />
-				</View>
+				</TransView>
 			)}
 			<View>
 				<Button width={width - 40} style={{ height: 50 }} isDark={isDark} isPrimary={true} onPress={() => makeAddPoll()}>

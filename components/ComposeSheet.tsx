@@ -19,6 +19,7 @@ import Poll from './composer/Poll'
 import Schedule from './composer/Schedule'
 import { Text } from './themed/Text'
 import { IconButton } from './ui/Button'
+import { TransView } from './ui/TransView'
 
 interface Props {
 	isOpened: boolean
@@ -178,7 +179,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 	return (
 		<View style={{ padding: 10, flexDirection: 'column', height: 345 }}>
 			{mode === 'compose' && (
-				<>
+				<TransView>
 					<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 						<TouchableOpacity activeOpacity={0.7} onPress={() => changeMode('acct')} style={{ flexGrow: 1 }}>
 							<View style={styles.acctContainer}>
@@ -202,7 +203,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 					<View style={{}}>
 						<Text>{composeAction?.type ? t(`composer.${composeAction.type}`) : ' '}</Text>
 					</View>
-				</>
+				</TransView>
 			)}
 			{mode === 'compose' && (
 				<Composer
@@ -218,11 +219,31 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 					isInSheet={isInSheet}
 				/>
 			)}
-			{mode === 'acct' && <Acct change={(r) => setUseAcct(r)} />}
-			{mode === 'emoji' && <Emoji client={client} add={(r) => addEmoji(r)} />}
-			{mode === 'menu' && <Menu client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />}
-			{mode === 'schedule' && <Schedule defaultSchedule={optional.scheduled_at || null} changeMode={changeMode} addSchedule={addSchedule} />}
-			{mode === 'poll' && <Poll defaultPoll={optional.poll || null} maxPollsOptions={maxPollsOptions} changeMode={changeMode} addPoll={addPoll} />}
+			{mode === 'acct' && (
+				<TransView>
+					<Acct change={(r) => setUseAcct(r)} />
+				</TransView>
+			)}
+			{mode === 'emoji' && (
+				<TransView>
+					<Emoji client={client} add={(r) => addEmoji(r)} />
+				</TransView>
+			)}
+			{mode === 'menu' && (
+				<TransView>
+					<Menu inSheet={true} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />
+				</TransView>
+			)}
+			{mode === 'schedule' && (
+				<TransView>
+					<Schedule defaultSchedule={optional.scheduled_at || null} changeMode={changeMode} addSchedule={addSchedule} />
+				</TransView>
+			)}
+			{mode === 'poll' && (
+				<TransView>
+					<Poll defaultPoll={optional.poll || null} maxPollsOptions={maxPollsOptions} changeMode={changeMode} addPoll={addPoll} />
+				</TransView>
+			)}
 			{mode === 'loading' && (
 				<View style={{ width: '100%', height: 200, alignItems: 'center', justifyContent: 'center' }}>
 					<ActivityIndicator />
