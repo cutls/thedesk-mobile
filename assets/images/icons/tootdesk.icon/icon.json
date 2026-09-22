@@ -6,6 +6,7 @@
     {
       "layers" : [
         {
+          "blend-mode" : "multiply",
           "image-name" : "3.svg",
           "name" : "3",
           "position" : {
@@ -17,7 +18,10 @@
           }
         },
         {
+          "blend-mode" : "multiply",
           "fill" : "none",
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "2 2.svg",
           "name" : "2 2",
           "position" : {
@@ -29,6 +33,7 @@
           }
         },
         {
+          "blend-mode" : "multiply",
           "image-name" : "1.svg",
           "name" : "1",
           "position" : {
@@ -51,16 +56,29 @@
           }
         },
         {
-          "blend-mode" : "normal",
+          "blend-mode-specializations" : [
+            {
+              "value" : "normal"
+            },
+            {
+              "appearance" : "tinted",
+              "value" : "normal"
+            }
+          ],
           "fill-specializations" : [
             {
               "value" : "system-light"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
             },
             {
               "appearance" : "tinted",
               "value" : "none"
             }
           ],
+          "hidden" : false,
           "image-name" : "white.svg",
           "name" : "white",
           "position" : {
