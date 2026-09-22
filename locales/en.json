@@ -21,6 +21,7 @@
 		"config": "Preferences",
 		"search": "Search",
 		"tag": "Tag",
+		"notification": "Notification",
 		"onOtherAcct": "React from other accounts"
     },
     "login": {
@@ -101,6 +102,9 @@
 				"title": "Move",
 				"body": "{user} migrated to"
 			},
+			"markAsRead": "Mark as Read",
+			"noNewNotifications": "No new notifications",
+			"showNotifications": "Show Notifications",
 			"unread": "{count} unread notifications (Click to mark as read)"
 		},
 		"actions": {

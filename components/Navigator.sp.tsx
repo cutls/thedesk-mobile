@@ -37,7 +37,7 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 	const textColor = PlatformColor('label')
 	const { timelines } = useTimelineStore()
 	const [isTimelineConfigOpened, setIsTimelineConfigOpened] = useState(false)
-	const [badge, setBadge] = useState<Record<string, boolean>>({})
+	const [badge, setBadge] = useState<Record<string, ReceiveNotificationPayload['notification'] | null>>({})
 	const currentTimeline = timelines[context.current]
 	const router = useRouter()
 	const composerDisplay = useConfigStore((state) => state.config.compose?.display ?? defaultSetting.compose.display)
@@ -54,7 +54,8 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 			'receive-notification',
 			async (ev) => {
 				const acctId = ev.payload.acctId
-				setBadge((prev) => ({ ...prev, [acctId]: true }))
+				const notification = ev.payload.notification
+				setBadge((prev) => ({ ...prev, [acctId]: notification }))
 			},
 			defaultSetting.timeline,
 			false
@@ -74,7 +75,7 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 	}, [timelines])
 	useEffect(() => {
 		if (currentTimeline && currentTimeline.kind !== 'notifications') return
-		setBadge((prev) => ({ ...prev, [currentTimeline?.acctId || '']: false }))
+		setBadge((prev) => ({ ...prev, [currentTimeline?.acctId || '']: null }))
 	}, [currentTimeline])
 	const colorToSystem = (color: string | null | undefined) => (color ? PlatformColor(`system${capitalizeFirst(color)}`) : undefined)
 	const getColor = (acctId: string) => colorToSystem(allAcctData.find((a) => a.id === acctId)?.color) || 'transparent'
@@ -126,7 +127,15 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 			<IconButton onPress={compose} style={{ width: 60, height: 60, margin: 5, marginTop: 20 }} isPrimary={true} color="teal" systemImage="square.and.pencil" width={60} isDark={isDark} />
 			
 		</GlassView>
-		{currentTimeline && <TimelineConfig isOpened={isTimelineConfigOpened} setIsOpened={setIsTimelineConfigOpened} timeline={currentTimeline} />}
+		{currentTimeline && (
+			<TimelineConfig
+				notification={badge[currentTimeline.acctId]}
+				onMarkAsRead={() => setBadge((prev) => ({ ...prev, [currentTimeline.acctId]: null }))}
+				isOpened={isTimelineConfigOpened}
+				setIsOpened={setIsTimelineConfigOpened}
+				timeline={currentTimeline}
+			/>
+		)}
 		</>
 	)
 }

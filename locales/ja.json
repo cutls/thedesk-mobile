@@ -21,6 +21,7 @@
 		"config": "設定",
 		"search": "検索",
 		"tag": "タグ",
+		"notification": "通知",
 		"onOtherAcct": "他のアカウントから操作"
 	},
 	"login": {
@@ -152,6 +153,9 @@
 				"title": "引越し",
 				"body": "{{user}} が引越しました"
 			},
+			"markAsRead": "既読にする",
+			"noNewNotifications": "新しい通知はありません",
+			"showNotifications": "通知を表示",
 			"unread": "{{count}} 件の未読通知 (クリックして既読にする)"
 		},
 		"actions": {

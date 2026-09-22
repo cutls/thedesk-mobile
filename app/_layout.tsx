@@ -42,6 +42,7 @@ export default function RootLayout() {
 							<Stack.Screen name="config" options={{ title: t('screen.config') }} />
 							<Stack.Screen name="search" options={{ title: t('screen.search') }} />
 							<Stack.Screen name="tag" options={{ title: t('screen.tag') }} />
+							<Stack.Screen name="notification" options={{ title: t('screen.notification') }} />
 							<Stack.Screen name="copy" options={{ title: t('timeline.action.copyText') }} />
 							<Stack.Screen name="user" options={{ title: '', headerShown: false }} />
 							<Stack.Screen name="handleShare" options={{ title: '', headerShown: false }} />

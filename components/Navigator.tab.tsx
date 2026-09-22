@@ -12,7 +12,6 @@ import type { FlashListRef } from '@shopify/flash-list'
 import { GlassView } from 'expo-glass-effect'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
-import type React from 'react'
 import { useCallback, useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlatformColor, Pressable, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
@@ -40,7 +39,7 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 	const textColor = PlatformColor('label')
 	const { timelines } = useTimelineStore()
 	const [isTimelineConfigOpened, setIsTimelineConfigOpened] = useState(false)
-	const [badge, setBadge] = useState<Record<string, boolean>>({})
+	const [badge, setBadge] = useState<Record<string, ReceiveNotificationPayload['notification'] | null>>({})
 	const currentTimeline = timelines[context.current]
 	const router = useRouter()
 	const composerDisplay = useConfigStore((state) => state.config.compose?.display ?? defaultSetting.compose.display)
@@ -57,7 +56,8 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 			'receive-notification',
 			async (ev) => {
 				const acctId = ev.payload.acctId
-				setBadge((prev) => ({ ...prev, [acctId]: true }))
+				const notification = ev.payload.notification
+				setBadge((prev) => ({ ...prev, [acctId]: notification }))
 			},
 			defaultSetting.timeline,
 			false
@@ -77,60 +77,69 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 	}, [timelines])
 	useEffect(() => {
 		if (currentTimeline && currentTimeline.kind !== 'notifications') return
-		setBadge((prev) => ({ ...prev, [currentTimeline?.acctId || '']: false }))
+		setBadge((prev) => ({ ...prev, [currentTimeline?.acctId || '']: null }))
 	}, [currentTimeline])
 	const colorToSystem = (color: string | null | undefined) => (color ? PlatformColor(`system${capitalizeFirst(color)}`) : undefined)
 	const getColor = (acctId: string) => colorToSystem(allAcctData.find((a) => a.id === acctId)?.color) || 'transparent'
 	return (
 		<>
-		<GlassView style={[styles.containerStyle]}>
-			<View style={{ width: width - 200, height: '100%', paddingLeft: 8, flexDirection: 'row' }}>
-				<View style={styles.infoBar}>
-					<View style={{ height: '100%', display: 'flex', flexDirection: 'row' }}>
-						<TouchableOpacity style={styles.glass20} onPress={() => router.push('/config')}>
-							<SymbolView name="gearshape" type="monochrome" tintColor={textColor} size={20} />
-						</TouchableOpacity>
-						<TouchableOpacity onPress={() => setIsTimelineConfigOpened(true)} style={{ width: 200, alignItems: 'center', justifyContent: 'center' }}>
-							<Text numberOfLines={1} style={{ textAlign: 'center' }}>{currentTimeline?.name || '?'}</Text>
-							<View style={{ position: 'absolute', top: 5, right: 10, width: 5, height: 5, borderRadius: 5, backgroundColor: badge[currentTimeline?.acctId || ''] ? 'red' : 'transparent' }} />
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.glass20} onPress={() => context.relayRef.current?.scrollToOffset({ offset: 0, animated: true })}>
-							<SymbolView name="arrow.up.to.line" type="monochrome" tintColor={textColor} size={20} />
-						</TouchableOpacity>
+			<GlassView style={[styles.containerStyle]}>
+				<View style={{ width: width - 200, height: '100%', paddingLeft: 8, flexDirection: 'row' }}>
+					<View style={styles.infoBar}>
+						<View style={{ height: '100%', display: 'flex', flexDirection: 'row' }}>
+							<TouchableOpacity style={styles.glass20} onPress={() => router.push('/config')}>
+								<SymbolView name="gearshape" type="monochrome" tintColor={textColor} size={20} />
+							</TouchableOpacity>
+							<TouchableOpacity onPress={() => setIsTimelineConfigOpened(true)} style={{ width: 200, alignItems: 'center', justifyContent: 'center' }}>
+								<Text numberOfLines={1} style={{ textAlign: 'center' }}>
+									{currentTimeline?.name || '?'}
+								</Text>
+								<View style={{ position: 'absolute', top: 5, right: 10, width: 5, height: 5, borderRadius: 5, backgroundColor: badge[currentTimeline?.acctId || ''] ? 'red' : 'transparent' }} />
+							</TouchableOpacity>
+							<TouchableOpacity style={styles.glass20} onPress={() => context.relayRef.current?.scrollToOffset({ offset: 0, animated: true })}>
+								<SymbolView name="arrow.up.to.line" type="monochrome" tintColor={textColor} size={20} />
+							</TouchableOpacity>
+						</View>
 					</View>
-				</View>
-				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-					<Pressable onPress={() => router.push(`/search?acctId=${currentTimeline?.acctId || ''}`)}>
-						<GlassView style={styles.glassAdd} isInteractive={true}>
-							<SymbolView name="magnifyingglass" type="monochrome" tintColor={textColor} size={18} />
-						</GlassView>
-					</Pressable>
-					<ScrollView style={styles.scrollBar} horizontal={true}>
-						{timelines.map((tl, index) => (
-							<Pressable key={tl.id} onPress={() => context.setCurrent(index)}>
-								<GlassView style={[styles.glass30]} tintColor={context.current === index ? tl.color || 'teal' : undefined} isInteractive={true}>
-									<SymbolView name={icon(tl.kind)} type="monochrome" tintColor={context.current === index ? 'white' : textColor} size={25} />
-									{tl.kind === 'notifications' && (
-										<View style={{ position: 'absolute', top: 8, right: 8, width: 10, height: 10, borderRadius: 5, backgroundColor: badge[tl?.acctId || ''] ? 'red' : 'transparent' }} />
-									)}
-									<View style={{ position: 'absolute', top: 35, left: 10, width: 25, height: 5, borderRadius: 2, padding: 1, backgroundColor: getColor(tl.acctId) }} />
-								</GlassView>
-							</Pressable>
-						))}
-						<Pressable onPress={() => openAddTimeline()}>
+					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+						<Pressable onPress={() => router.push(`/search?acctId=${currentTimeline?.acctId || ''}`)}>
 							<GlassView style={styles.glassAdd} isInteractive={true}>
-								<SymbolView name="plus" type="monochrome" tintColor={textColor} size={20} />
+								<SymbolView name="magnifyingglass" type="monochrome" tintColor={textColor} size={18} />
 							</GlassView>
 						</Pressable>
-					</ScrollView>
+						<ScrollView style={styles.scrollBar} horizontal={true}>
+							{timelines.map((tl, index) => (
+								<Pressable key={tl.id} onPress={() => context.setCurrent(index)}>
+									<GlassView style={[styles.glass30]} tintColor={context.current === index ? tl.color || 'teal' : undefined} isInteractive={true}>
+										<SymbolView name={icon(tl.kind)} type="monochrome" tintColor={context.current === index ? 'white' : textColor} size={25} />
+										{tl.kind === 'notifications' && (
+											<View style={{ position: 'absolute', top: 8, right: 8, width: 10, height: 10, borderRadius: 5, backgroundColor: badge[tl?.acctId || ''] ? 'red' : 'transparent' }} />
+										)}
+										<View style={{ position: 'absolute', top: 35, left: 10, width: 25, height: 5, borderRadius: 2, padding: 1, backgroundColor: getColor(tl.acctId) }} />
+									</GlassView>
+								</Pressable>
+							))}
+							<Pressable onPress={() => openAddTimeline()}>
+								<GlassView style={styles.glassAdd} isInteractive={true}>
+									<SymbolView name="plus" type="monochrome" tintColor={textColor} size={20} />
+								</GlassView>
+							</Pressable>
+						</ScrollView>
+					</View>
 				</View>
-			</View>
-			<Button onPress={compose} style={{ width: 100, height: 45, marginRight: 10 }} isPrimary={true} color="teal" systemImage="square.and.pencil" width={100} isDark={isDark}>
-				{t('composer.post')}
-			</Button>
-			
-		</GlassView>
-		{currentTimeline && <TimelineConfig isOpened={isTimelineConfigOpened} setIsOpened={setIsTimelineConfigOpened} timeline={currentTimeline} />}
+				<Button onPress={compose} style={{ width: 100, height: 45, marginRight: 10 }} isPrimary={true} color="teal" systemImage="square.and.pencil" width={100} isDark={isDark}>
+					{t('composer.post')}
+				</Button>
+			</GlassView>
+			{currentTimeline && (
+				<TimelineConfig
+					notification={badge[currentTimeline.acctId]}
+					onMarkAsRead={() => setBadge((prev) => ({ ...prev, [currentTimeline.acctId]: null }))}
+					isOpened={isTimelineConfigOpened}
+					setIsOpened={setIsTimelineConfigOpened}
+					timeline={currentTimeline}
+				/>
+			)}
 		</>
 	)
 }
@@ -146,7 +155,7 @@ const createStyles = ({ width }: { width: number }) =>
 			padding: 5,
 			display: 'flex',
 			flexDirection: 'row',
-			justifyContent: 'space-between',
+			justifyContent: 'space-between'
 		},
 		infoBar: {
 			height: 50,
