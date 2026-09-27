@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, AppState, type AppStateStatus, PlatformColor, RefreshControl, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Notification } from '../status/Notification'
 import { Text } from '../themed/Text'
+import { ProgressView } from '../ui/ProgressView'
 interface IProps {
 	timeline: TimelineProps
 	columnWidth: number
@@ -122,45 +123,48 @@ export const Notifications = (props: IProps) => {
 	}
 	if (!client || !acct) return null
 	return (
-		<FlashList
-			data={statuses}
-			keyExtractor={(item) => item.id}
-			ref={relayRef}
-			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true)} />}
-			ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
-			renderItem={({ item: status }) => (
-				<Notification
-					status={status}
-					client={client}
-					acct={acct}
-					columnWidth={columnWidth}
-					updateStatus={updateStatus}
-					composeAction={composeAction}
-					config={{}}
-					lang={lang === 'ja' ? 'ja' : 'en'}
-					filters={filters}
-				/>
-			)}
-			onEndReached={() => {
-				if (isMore) return
-				if (statuses.length >= 20) more()
-			}}
-			maintainVisibleContentPosition={{
-				autoscrollToTopThreshold: 0,
-				animateAutoScrollToBottom: false
-			}}
-			ListEmptyComponent={() => <View style={{ alignItems: 'center', marginTop: 100 }}>{!isInitiated ? <ActivityIndicator /> : <Text>{t('empty')}</Text>}</View>}
-			ListFooterComponent={() => (
-				<View style={{ width: columnWidth, justifyContent: 'center', alignItems: 'center', padding: 20, display: statuses.length === 0 ? 'none' : 'flex' }}>
-					{isMore ? (
-						<ActivityIndicator />
-					) : (
-						<TouchableOpacity activeOpacity={0.7} onPress={() => more()} style={{ padding: 10, borderRadius: 5, borderWidth: 1, borderColor: PlatformColor('separator'), marginBottom: 100 }}>
-							<Text>{t('timeline.more')}</Text>
-						</TouchableOpacity>
-					)}
-				</View>
-			)}
-		/>
+		<View style={{ flex: 1 }}>
+			<FlashList
+				data={statuses}
+				keyExtractor={(item) => item.id}
+				ref={relayRef}
+				refreshControl={<RefreshControl refreshing={false} onRefresh={() => load(true)} />}
+				ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
+				renderItem={({ item: status }) => (
+					<Notification
+						status={status}
+						client={client}
+						acct={acct}
+						columnWidth={columnWidth}
+						updateStatus={updateStatus}
+						composeAction={composeAction}
+						config={{}}
+						lang={lang === 'ja' ? 'ja' : 'en'}
+						filters={filters}
+					/>
+				)}
+				onEndReached={() => {
+					if (isMore) return
+					if (statuses.length >= 20) more()
+				}}
+				maintainVisibleContentPosition={{
+					autoscrollToTopThreshold: 0,
+					animateAutoScrollToBottom: false
+				}}
+				ListEmptyComponent={() => <View style={{ alignItems: 'center', marginTop: 100 }}>{!isInitiated ? <ActivityIndicator /> : <Text>{t('empty')}</Text>}</View>}
+				ListFooterComponent={() => (
+					<View style={{ width: columnWidth, justifyContent: 'center', alignItems: 'center', padding: 20, display: statuses.length === 0 ? 'none' : 'flex' }}>
+						{isMore ? (
+							<ActivityIndicator />
+						) : (
+							<TouchableOpacity activeOpacity={0.7} onPress={() => more()} style={{ padding: 10, borderRadius: 5, borderWidth: 1, borderColor: PlatformColor('separator'), marginBottom: 100 }}>
+								<Text>{t('timeline.more')}</Text>
+							</TouchableOpacity>
+						)}
+					</View>
+				)}
+			/>
+			{isRefreshing && <ProgressView style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />}
+		</View>
 	)
 }

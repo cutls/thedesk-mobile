@@ -16,13 +16,14 @@ import type {
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import generator from '@cutls/megalodon'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useNavigation } from 'expo-router'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, AppState, type AppStateStatus, PlatformColor, RefreshControl, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Status } from '../status/Status'
 import { Text } from '../themed/Text'
+import { ProgressView } from '../ui/ProgressView'
 interface IProps {
 	timeline: TimelineProps
 	columnWidth: number
@@ -51,6 +52,8 @@ export const Timeline = (props: IProps) => {
 	const [isRefreshing, setIsRefreshing] = useState(false)
 	const [maxId, setMaxId] = useState<string | null>(null)
 	const scrollOffset = useRef(0)
+	const navigation = useNavigation()
+	const lastUnfocusedRoute = useRef<string | null>(null)
 	const isStreaming = false
 	const updateStatus = (newStatus: Entity.Status | null, deleteId?: string) => {
 		if (newStatus === null) setStatuses((prevStatuses) => prevStatuses.filter((s) => s.id !== deleteId))
@@ -170,10 +173,18 @@ export const Timeline = (props: IProps) => {
 		const e = AppState.addEventListener('change', _handleAppStateChange)
 		return () => e.remove()
 	}, [])
+	useEffect(() => {
+		return navigation.addListener('state', ({ data: { state } }) => {
+			// Keep tracking while away so visiting another screen after /post does not skip a load.
+			if (!navigation.isFocused()) lastUnfocusedRoute.current = state.routes[state.index].name
+		})
+	}, [navigation])
 	useFocusEffect(
 		useCallback(() => {
-			load(false, true)
-			return () => {}
+			const returnedFromPost = lastUnfocusedRoute.current === 'post'
+			lastUnfocusedRoute.current = null
+			if (returnedFromPost) return
+			load(scrollOffset.current < 100, true)
 		}, [])
 	)
 	useEffect(() => {
@@ -194,50 +205,53 @@ export const Timeline = (props: IProps) => {
 	}
 	if (!client || !acct) return null
 	return (
-		<FlashList
-			data={statuses}
-			keyExtractor={(item) => item.id}
-			ref={relayRef}
-			onScroll={(event) => {
-				scrollOffset.current = event.nativeEvent.contentOffset.y
-			}}
-			scrollEventThrottle={16}
-			refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={() => load(true, false)} />}
-			ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
-			renderItem={({ item: status }) => (
-				<Status
-					status={status}
-					client={client}
-					acct={acct}
-					columnWidth={columnWidth}
-					updateStatus={updateStatus}
-					composeAction={composeAction}
-					config={config.timeline}
-					lang={lang === 'ja' ? 'ja' : 'en'}
-					filters={filters}
-				/>
-			)}
-			ListEmptyComponent={() => <View style={{ alignItems: 'center', marginTop: 100 }}>{!isInitiated ? <ActivityIndicator /> : <Text>{t('empty')}</Text>}</View>}
-			onEndReached={() => {
-				if (isMore) return
-				if (statuses.length >= 20) more()
-			}}
-			maintainVisibleContentPosition={{
-				autoscrollToTopThreshold: 0,
-				animateAutoScrollToBottom: false
-			}}
-			onEndReachedThreshold={0}
-			ListFooterComponent={() => (
-				<View style={{ width: columnWidth, justifyContent: 'center', alignItems: 'center', padding: 20, display: statuses.length === 0 ? 'none' : 'flex' }}>
-					{isMore ? (
-						<ActivityIndicator />
-					) : (
-						<TouchableOpacity activeOpacity={0.7} onPress={() => more()} style={{ padding: 10, borderRadius: 5, borderWidth: 1, borderColor: PlatformColor('separator'), marginBottom: 100 }}>
-							<Text>{t('timeline.more')}</Text>
-						</TouchableOpacity>
-					)}
-				</View>
-			)}
-		/>
+		<View style={{ flex: 1 }}>
+			<FlashList
+				data={statuses}
+				keyExtractor={(item) => item.id}
+				ref={relayRef}
+				onScroll={(event) => {
+					scrollOffset.current = event.nativeEvent.contentOffset.y
+				}}
+				scrollEventThrottle={16}
+				refreshControl={<RefreshControl refreshing={false} onRefresh={() => load(true, false)} />}
+				ItemSeparatorComponent={() => <View style={{ borderWidth: 0.5, borderColor: PlatformColor('separator'), marginLeft: 5, width: columnWidth - 10 }}></View>}
+				renderItem={({ item: status }) => (
+					<Status
+						status={status}
+						client={client}
+						acct={acct}
+						columnWidth={columnWidth}
+						updateStatus={updateStatus}
+						composeAction={composeAction}
+						config={config.timeline}
+						lang={lang === 'ja' ? 'ja' : 'en'}
+						filters={filters}
+					/>
+				)}
+				ListEmptyComponent={() => <View style={{ alignItems: 'center', marginTop: 100 }}>{!isInitiated ? <ActivityIndicator /> : <Text>{t('empty')}</Text>}</View>}
+				onEndReached={() => {
+					if (isMore) return
+					if (statuses.length >= 20) more()
+				}}
+				maintainVisibleContentPosition={{
+					autoscrollToTopThreshold: 0,
+					animateAutoScrollToBottom: false
+				}}
+				onEndReachedThreshold={0}
+				ListFooterComponent={() => (
+					<View style={{ width: columnWidth, justifyContent: 'center', alignItems: 'center', padding: 20, display: statuses.length === 0 ? 'none' : 'flex' }}>
+						{isMore ? (
+							<ActivityIndicator />
+						) : (
+							<TouchableOpacity activeOpacity={0.7} onPress={() => more()} style={{ padding: 10, borderRadius: 5, borderWidth: 1, borderColor: PlatformColor('separator'), marginBottom: 100 }}>
+								<Text>{t('timeline.more')}</Text>
+							</TouchableOpacity>
+						)}
+					</View>
+				)}
+			/>
+			{isRefreshing && <ProgressView style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />}
+		</View>
 	)
 }
