@@ -69,8 +69,10 @@ export const Attachment = (props: IProps) => {
 						return (
 							<TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => openBrowserAsync(a.url)}>
 								<Image source={getPreviewUrl(a)} contentFit={config.cropImage} style={{ height, width: width / attachments.length - 5, ...styles.common }} />
-								<View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 2 }}>
-									<SymbolView name="play.circle" type="monochrome" tintColor="white" size={24} />
+								<View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+									<View style={{ backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 2 }}>
+										<SymbolView name="play.circle" type="monochrome" tintColor="white" size={24} />
+									</View>
 								</View>
 							</TouchableOpacity>
 						)
