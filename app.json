@@ -67,7 +67,8 @@
             }
           }
         }
-      ]
+      ],
+      "react-native-nitro-websockets"
     ],
     "experiments": {
       "typedRoutes": true,
