@@ -24,7 +24,8 @@ export function CustomedButton({ isPrimary, color, width: requestedWidth, isLoad
 	const useVariantNotGlass = isPrimary ? 'borderedProminent' : 'bordered'
 	const useVariantGlass = isPrimary ? 'glassProminent' : 'glass'
 	const variant = props.isGlass ? useVariantGlass : useVariantNotGlass
-	const modifiersStandard = [buttonStyle(variant), disabled(isLoading), props.controlSize ? controlSize(props.controlSize) : controlSize('regular')]
+	// biome-ignore lint/complexity/noUselessTernary: <disabled undefined cannot be tapped>
+	const modifiersStandard = [buttonStyle(variant), disabled(isLoading ? true : false), props.controlSize ? controlSize(props.controlSize) : controlSize('regular')]
 	const modifiersWithColor = isPrimary && color ? [...modifiersStandard, tint(color)] : modifiersStandard
 
 	return (
