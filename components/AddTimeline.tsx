@@ -208,7 +208,7 @@ export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 									modifiers={[frame({ width: width }), environment('editMode', 'active'), listStyle('automatic')]}
 								>
 									{timelines.map((tl) => (
-										<List.ForEach onDelete={([item]) => deleteTimeline(timelines[item].id)} key={tl.id} onMove={([from], to) => moveTL(from, to)}>
+										<List.ForEach onDelete={() => deleteTimeline(tl.id)} key={tl.id} onMove={([from], to) => moveTL(from, to)}>
 											<Label title={tl.name}  modifiers={[frame({ width: width })]} />
 										</List.ForEach>
 									))}
