@@ -6,8 +6,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "expo run:android --device",
+    "ios": "expo run:ios --device",
     "prebuild": "expo prebuild",
     "web": "expo start --web",
     "lint:fix": "npx @biomejs/biome check --write ./",

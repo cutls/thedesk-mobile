@@ -2,9 +2,9 @@
   "expo": {
     "name": "TheDesk",
     "slug": "TootDesk",
-    "version": "2.1.11",
+    "version": "2.1.12",
     "ios": {
-      "buildNumber": "116",
+      "buildNumber": "117",
       "supportsTablet": true,
       "bundleIdentifier": "top.thedesk.toot",
       "infoPlist": {
