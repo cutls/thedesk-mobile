@@ -5,9 +5,11 @@ import axios from 'axios'
 import * as ImageManipulator from 'expo-image-manipulator'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
+import { t } from 'i18next'
 import { createContext } from 'react'
 import { Alert } from 'react-native'
-import { getSpotifyToken, saveSpotifyToken } from './storage'
+import { confirmDialog } from './alert'
+import { clearSpotifyToken, getSpotifyToken, saveSpotifyToken } from './storage'
 
 const apiGateway = 'https://ep9jquu2w4.execute-api.ap-northeast-1.amazonaws.com/thedesk/spotify'
 type PlayingSource = NowPlayingState | null
@@ -41,7 +43,6 @@ export const nowplaying = async (client: MegalodonInterface, source: 'apple' | '
 		}
 	} else if (source === 'spotify') {
 		try {
-			//if (source) return await spotifyAuth(client)
 			const tokenData = await getSpotifyToken()
 			if (tokenData) {
 				const unixTime = Date.now()
@@ -60,7 +61,8 @@ export const nowplaying = async (client: MegalodonInterface, source: 'apple' | '
 					return await spotify(accessToken, client, config)
 				}
 			} else {
-				return await spotifyAuth(client, config)
+				const accessToken = await spotifyAuth()
+				if (accessToken) return await spotify(accessToken, client, config)
 			}
 		} catch (e: any) {
 			Alert.alert('Spotify', `Reason: ${e.message || e.toString()}`)
@@ -76,6 +78,18 @@ async function spotify(accessToken: string, client: MegalodonInterface, config: 
 	})
 	if (res.status !== 200) {
 		console.log('nowplaying spotify fetch error', res.status)
+		if ((res.status >= 400 && res.status < 410) || res.status === 500) {
+			const result = await confirmDialog(
+				t('config.nowPlaying.spotify.reauthenticateTitle'),
+				t('config.nowPlaying.spotify.reauthenticateMessage'),
+				[{ text: 'cancel', style: 'cancel' }, { text: 'config.nowPlaying.spotify.authenticate' }],
+				(s) => t(s)
+			)
+			if (result === 1) {
+				await clearSpotifyToken()
+				await spotifyAuth()
+			}
+		}
 		return { text: '', image: null }
 	}
 	const json = await res.json()
@@ -113,29 +127,31 @@ async function spotify(accessToken: string, client: MegalodonInterface, config: 
 		return { text: result, image: null }
 	}
 }
-async function spotifyAuth(client: MegalodonInterface, config: Settings['nowPlaying']) {
+export async function spotifyAuth(): Promise<string | null> {
 	try {
 		const a = await WebBrowser.openAuthSessionAsync(`${apiGateway}?state=connectTootdesk`)
 		if (a.type === 'success') {
 			const { queryParams } = Linking.parse(a.url)
 			if (!queryParams) throw new Error('No available code found.')
 			const { spotify: spotifyCode } = queryParams
+			if (!spotifyCode) throw new Error('No available code found.')
 			const api = await fetch(`${apiGateway}?state=auth&code=${spotifyCode?.toString().replace(/\n/g, '')}`, {
 				headers: {
 					'content-type': 'application/json'
 				}
 			})
+			if (!api.ok) throw new Error(`Authentication failed (${api.status}).`)
 			const json = await api.json()
 			const { accessToken, refreshToken } = json
 			if (!accessToken || !refreshToken) throw new Error('No tokens received.')
-			saveSpotifyToken(accessToken, refreshToken, 3600)
-			return await spotify(accessToken, client, config)
+			await saveSpotifyToken(accessToken, refreshToken, 3600)
+			return accessToken
 		} else {
-			throw new Error('User cancelled login.')
+			return null
 		}
 	} catch (e: any) {
 		Alert.alert('Spotify', `Reason: ${e.message || e.toString()}`)
-		return { text: '', image: null }
+		return null
 	}
 }
 

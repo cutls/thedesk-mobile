@@ -339,6 +339,12 @@
 		},
 		"nowPlaying": {
 			"title": "Now Playing",
+			"spotify": {
+				"authenticate": "Authenticate with Spotify",
+				"clear": "Clear Spotify credentials",
+				"reauthenticateTitle": "Reauthenticate with Spotify",
+				"reauthenticateMessage": "Could not fetch the current track from Spotify. Clear your saved credentials and sign in again? After signing in, run Now Playing again to fetch the track."
+			},
 			"attachArtwork": {
 				"label": "Attach Artwork",
 				"hint": "Attach album artwork to the post"

@@ -87,6 +87,9 @@ export const getSpotifyToken = async (): Promise<{ accessToken: string; refreshT
 	if (!value) return null
 	return JSON.parse(value) as { accessToken: string; refreshToken: string; expires: string }
 }
+export const clearSpotifyToken = async () => {
+	await Storage.removeItem('spotify')
+}
 
 export const allReset = async () => {
 	await Storage.clear()

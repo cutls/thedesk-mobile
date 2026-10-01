@@ -4,7 +4,8 @@ import { Dropdown } from '@/components/ui/Dropdown'
 import { defaultSetting } from '@/entities/settings'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import { confirmDialog, CONTINUE } from '@/utils/alert'
-import { getSettings, saveSettings } from '@/utils/storage'
+import { spotifyAuth } from '@/utils/nowplaying'
+import { clearSpotifyToken, getSettings, getSpotifyToken, saveSettings } from '@/utils/storage'
 import { useConfigStore } from '@/utils/store/config'
 import { staticStyles } from '@/utils/theme'
 import { ignoreSafeArea } from '@expo/ui/swift-ui/modifiers'
@@ -15,7 +16,7 @@ import { usePreventRemove } from 'expo-router/react-navigation'
 import { SymbolView } from 'expo-symbols'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, InputAccessoryView, PlatformColor, StyleSheet, Switch, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { Alert, FlatList, InputAccessoryView, PlatformColor, StyleSheet, Switch, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 const actionCropContain = [
@@ -50,6 +51,39 @@ export default function Index() {
 	const [npTemplate, setNpTemplate] = useState(nowPlaying.template || '')
 	const [composerDisplay, setComposerDisplay] = useState(config.compose?.display ?? defaultSetting.compose.display)
 	const isDirty = useRef(false)
+	const [hasSpotifyToken, setHasSpotifyToken] = useState(false)
+	const [spotifyBusy, setSpotifyBusy] = useState(true)
+
+	useEffect(() => {
+		const loadSpotifyToken = async () => {
+			try {
+				setHasSpotifyToken(!!(await getSpotifyToken()))
+			} catch (e) {
+				Alert.alert('Spotify', e instanceof Error ? e.message : String(e))
+			} finally {
+				setSpotifyBusy(false)
+			}
+		}
+		loadSpotifyToken()
+	}, [])
+
+	const handleSpotifyAuth = async () => {
+		if (spotifyBusy) return
+		setSpotifyBusy(true)
+		try {
+			if (hasSpotifyToken) {
+				await clearSpotifyToken()
+				setHasSpotifyToken(false)
+			} else {
+				const accessToken = await spotifyAuth()
+				if (accessToken) setHasSpotifyToken(true)
+			}
+		} catch (e) {
+			Alert.alert('Spotify', e instanceof Error ? e.message : String(e))
+		} finally {
+			setSpotifyBusy(false)
+		}
+	}
 
 	// Load persisted settings on mount
 	useEffect(() => {
@@ -250,6 +284,10 @@ export default function Index() {
 				</GlassView>
 
 				<Text style={styles.sectionHeader}>{t('config.nowPlaying.title')}</Text>
+
+				<Button onPress={handleSpotifyAuth} style={{ padding: 10 }} systemImage={hasSpotifyToken ? 'trash' : 'key'} width={width - 20} isDark={isDark} isLoading={spotifyBusy} disabled={spotifyBusy}>
+					{t(hasSpotifyToken ? 'config.nowPlaying.spotify.clear' : 'config.nowPlaying.spotify.authenticate')}
+				</Button>
 
 				<GlassView style={styles.card}>
 					<View style={styles.row}>
