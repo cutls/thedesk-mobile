@@ -342,6 +342,7 @@
 			"spotify": {
 				"authenticate": "Authenticate with Spotify",
 				"clear": "Clear Spotify credentials",
+				"clearConfirm": "Are you sure you want to log out of Spotify and clear your saved credentials?",
 				"reauthenticateTitle": "Reauthenticate with Spotify",
 				"reauthenticateMessage": "Could not fetch the current track from Spotify. Clear your saved credentials and sign in again? After signing in, run Now Playing again to fetch the track."
 			},

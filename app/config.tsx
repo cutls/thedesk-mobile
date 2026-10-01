@@ -72,6 +72,8 @@ export default function Index() {
 		setSpotifyBusy(true)
 		try {
 			if (hasSpotifyToken) {
+				const result = await confirmDialog(t('config.nowPlaying.spotify.clear'), t('config.nowPlaying.spotify.clearConfirm'), CONTINUE, t)
+				if (result !== 1) return
 				await clearSpotifyToken()
 				setHasSpotifyToken(false)
 			} else {

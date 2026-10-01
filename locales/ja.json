@@ -341,6 +341,7 @@
 			"spotify": {
 				"authenticate": "Spotifyを認証する",
 				"clear": "Spotifyの認証情報をクリア",
+				"clearConfirm": "Spotifyからログアウトして、保存済みの認証情報をクリアしますか？",
 				"reauthenticateTitle": "Spotifyの再認証",
 				"reauthenticateMessage": "Spotifyから再生中の曲を取得できませんでした。保存済みの認証情報をクリアして、再認証しますか？ログイン後、曲を取得するにはNowPlayingを再度実行してください。"
 			},
