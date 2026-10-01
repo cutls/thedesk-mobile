@@ -1,6 +1,6 @@
 import type { Account } from '@/entities/account'
 import type { Timeline as TimelineProps } from '@/entities/timeline'
-import { listenTimeline, listenTimelineWaiter, listenUser, listenUserWaiter } from '@/utils/socket'
+import { getTimelineStreamingConnected, listenTimeline, listenTimelineWaiter, listenUser, listenUserWaiter, subscribeStreamingConnection } from '@/utils/socket'
 import { getAcctById } from '@/utils/storage'
 import { useConfigStore } from '@/utils/store/config'
 import { useFilterStore } from '@/utils/store/filter'
@@ -18,7 +18,7 @@ import generator from '@cutls/megalodon'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
 import { useFocusEffect, useNavigation } from 'expo-router'
 import type React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, AppState, type AppStateStatus, PlatformColor, RefreshControl, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Status } from '../status/Status'
@@ -54,7 +54,11 @@ export const Timeline = (props: IProps) => {
 	const scrollOffset = useRef(0)
 	const navigation = useNavigation()
 	const lastUnfocusedRoute = useRef<string | null>(null)
-	const isStreaming = false
+	const isStreaming = useSyncExternalStore(
+		subscribeStreamingConnection,
+		() => getTimelineStreamingConnected(timeline),
+		() => false
+	)
 	const updateStatus = (newStatus: Entity.Status | null, deleteId?: string) => {
 		if (newStatus === null) setStatuses((prevStatuses) => prevStatuses.filter((s) => s.id !== deleteId))
 		if (newStatus) setStatuses((prevStatuses) => prevStatuses.map((s) => (s.id === newStatus.id ? newStatus : s)))
@@ -252,6 +256,7 @@ export const Timeline = (props: IProps) => {
 				)}
 			/>
 			{isRefreshing && <ProgressView style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />}
+			{isStreaming && <View pointerEvents="none" style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: 'green', zIndex: 1 }} />}
 		</View>
 	)
 }
