@@ -1,5 +1,6 @@
 import type { Account } from '@/entities/account'
 import type { Timeline as TimelineProps } from '@/entities/timeline'
+import { useRootFocusEffect } from '@/hooks/useRootFocusEffect'
 import { listenUser, listenUserWaiter } from '@/utils/socket'
 import { getAcctById } from '@/utils/storage'
 import { useConfigStore } from '@/utils/store/config'
@@ -9,7 +10,6 @@ import type { ReceiveNotificationPayload } from '@/utils/type'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import generator from '@cutls/megalodon'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
-import { useFocusEffect } from 'expo-router'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -102,7 +102,7 @@ export const Notifications = (props: IProps) => {
 		const e = AppState.addEventListener('change', _handleAppStateChange)
 		return () => e.remove()
 	}, [])
-	useFocusEffect(
+	useRootFocusEffect(
 		useCallback(() => {
 			load(false)
 			return () => {}

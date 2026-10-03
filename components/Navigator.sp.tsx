@@ -1,5 +1,6 @@
 import type { Account } from '@/entities/account'
 import { defaultSetting } from '@/entities/settings'
+import { useRootFocusEffect } from '@/hooks/useRootFocusEffect'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import { allClose, listenUser, start } from '@/utils/socket'
 import { getTimelineAccount, listAccts } from '@/utils/storage'
@@ -10,7 +11,7 @@ import { icon } from '@/utils/timelineName'
 import type { IState, ReceiveNotificationPayload } from '@/utils/type'
 import type { FlashListRef } from '@shopify/flash-list'
 import { GlassView } from 'expo-glass-effect'
-import { useFocusEffect, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { useCallback, useEffect, useState, type RefObject } from 'react'
 import { PlatformColor, Pressable, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
@@ -45,11 +46,14 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 		if (composerDisplay === 'screen') router.push({ pathname: '/post', params: { acctId: currentTimeline?.acctId || '' } })
 		else openComposer()
 	}
-	const load = async () => {
+	const load = async (isCancelled: () => boolean) => {
 		const accounts = await listAccts()
+		if (isCancelled()) return
 		setAllAcctData(accounts)
 		const tlAcct = await getTimelineAccount()
+		if (isCancelled()) return
 		await start(tlAcct, true)
+		if (isCancelled()) return
 		listenUser<ReceiveNotificationPayload>(
 			'receive-notification',
 			async (ev) => {
@@ -61,18 +65,16 @@ export default function Navigator({ openComposer, openAddTimeline, context }: Pr
 			false
 		)
 	}
-	useFocusEffect(
+	useRootFocusEffect(
 		useCallback(() => {
-			load()
+			let cancelled = false
+			void load(() => cancelled)
 			return () => {
-				allClose()
+				cancelled = true
+				void allClose()
 			}
-		}, [])
+		}, [timelines])
 	)
-	useEffect(() => {
-		allClose()
-		load()
-	}, [timelines])
 	useEffect(() => {
 		if (currentTimeline && currentTimeline.kind !== 'notifications') return
 		setBadge((prev) => ({ ...prev, [currentTimeline?.acctId || '']: null }))

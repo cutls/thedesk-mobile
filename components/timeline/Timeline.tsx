@@ -1,5 +1,6 @@
 import type { Account } from '@/entities/account'
 import type { Timeline as TimelineProps } from '@/entities/timeline'
+import { useRootFocusEffect } from '@/hooks/useRootFocusEffect'
 import { getTimelineStreamingConnected, listenTimeline, listenTimelineWaiter, listenUser, listenUserWaiter, subscribeStreamingConnection } from '@/utils/socket'
 import { getAcctById } from '@/utils/storage'
 import { useConfigStore } from '@/utils/store/config'
@@ -16,7 +17,6 @@ import type {
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import generator from '@cutls/megalodon'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
-import { useFocusEffect, useNavigation } from 'expo-router'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -52,8 +52,6 @@ export const Timeline = (props: IProps) => {
 	const [isRefreshing, setIsRefreshing] = useState(false)
 	const [maxId, setMaxId] = useState<string | null>(null)
 	const scrollOffset = useRef(0)
-	const navigation = useNavigation()
-	const lastUnfocusedRoute = useRef<string | null>(null)
 	const isStreaming = useSyncExternalStore(
 		subscribeStreamingConnection,
 		() => getTimelineStreamingConnected(timeline),
@@ -177,17 +175,8 @@ export const Timeline = (props: IProps) => {
 		const e = AppState.addEventListener('change', _handleAppStateChange)
 		return () => e.remove()
 	}, [])
-	useEffect(() => {
-		return navigation.addListener('state', ({ data: { state } }) => {
-			// Keep tracking while away so visiting another screen after /post does not skip a load.
-			if (!navigation.isFocused()) lastUnfocusedRoute.current = state.routes[state.index].name
-		})
-	}, [navigation])
-	useFocusEffect(
+	useRootFocusEffect(
 		useCallback(() => {
-			const returnedFromPost = lastUnfocusedRoute.current === 'post'
-			lastUnfocusedRoute.current = null
-			if (returnedFromPost) return
 			load(scrollOffset.current < 100, true)
 		}, [])
 	)
@@ -256,7 +245,7 @@ export const Timeline = (props: IProps) => {
 				)}
 			/>
 			{isRefreshing && <ProgressView style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />}
-			{isStreaming && <View pointerEvents="none" style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: 'green', zIndex: 1 }} />}
+			{isStreaming && <View pointerEvents="none" style={{ position: 'absolute', top: 4, right: 4, width: 4, height: 4, borderRadius: 2, backgroundColor: 'green', zIndex: 1 }} />}
 		</View>
 	)
 }
