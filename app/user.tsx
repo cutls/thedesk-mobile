@@ -31,8 +31,12 @@ import { useIsPreview, useLocalSearchParams, useRouter } from 'expo-router'
 import { SymbolView } from 'expo-symbols'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, type OpaqueColorValue, PlatformColor, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { ActivityIndicator, type OpaqueColorValue, PlatformColor, type ScrollViewInstance, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import Animated, { useAnimatedProps, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+const AnimatedImage = Animated.createAnimatedComponent(Image)
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
 const BasePerson = ({ relation: r, textColor }: { relation: Entity.Relationship; textColor: OpaqueColorValue }) => {
 	if (r.blocked_by || r.blocking) return <SymbolView name="person.slash.fill" type="monochrome" tintColor={textColor} size={20} />
@@ -66,7 +70,20 @@ const GlassViewFallback = ({ isPreview, style, children }: { isPreview: boolean;
 export default function Index() {
 	const { t } = useTranslation()
 	const isPreview = useIsPreview()
-	const [scrollY, setScrollY] = useState(0)
+	const scrollY = useSharedValue(0)
+	const onScroll = useAnimatedScrollHandler((event) => {
+		scrollY.value = event.contentOffset.y
+	})
+	const headerStyle = useAnimatedStyle(() => ({
+		// Animate the actual height to preserve the image's cover crop during bounce.
+		height: Math.max(340, 300 - Math.min(0, scrollY.value))
+	}))
+	const compactHeaderStyle = useAnimatedStyle(() => ({
+		opacity: scrollY.value > 300 ? 1 : 0
+	}))
+	const compactHeaderBlurProps = useAnimatedProps(() => ({
+		intensity: scrollY.value > 300 ? 100 : 0
+	}))
 
 	const router = useRouter()
 	const params = useLocalSearchParams()
@@ -84,7 +101,7 @@ export default function Index() {
 	const [basic, setBasic] = useState<Entity.Account | null>(null)
 	const [relation, setRelation] = useState<Entity.Relationship | null>(null)
 	const [rSheet, setRSheet] = useState(false)
-	const ref = useRef<ScrollView>(null)
+	const ref = useRef<ScrollViewInstance>(null)
 	const [page, setPage] = useState(0)
 	const verifiedBg = isDark ? '#083416' : '#d2e2d7'
 	const lang = Localization.getLocales()[0]?.languageTag === 'ja-JP' ? 'ja' : 'en'
@@ -138,9 +155,11 @@ export default function Index() {
 					}}
 				>
 					<IconButton onPress={() => router.back()} style={{ width: 45, height: 45 }} systemImage="chevron.left" width={45} isDark={isDark} />
-					<Button onPress={() => (ref.current as any)?.scrollTo(0)} style={{ width: 200, height: 45, opacity: scrollY > 300 ? 100 : 0, padding: 10 }} width={200} isDark={isDark}>
-						{basic.acct}
-					</Button>
+					<Animated.View style={compactHeaderStyle}>
+						<Button onPress={() => ref.current?.scrollTo({ y: 0 })} style={{ width: 200, height: 45, padding: 10 }} width={200} isDark={isDark}>
+							{basic.acct}
+						</Button>
+					</Animated.View>
 					{relation && (
 						<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
 							<CustomButton onPress={() => setRSheet(true)} style={{ width: 45, height: 45, marginRight: 2 }}>
@@ -149,11 +168,11 @@ export default function Index() {
 						</View>
 					)}
 				</View>
-				<Image style={{ height: 120, width: width, opacity: scrollY > 300 ? 1 : 0 }} source={{ uri: basic.header }} />
-				<BlurView intensity={scrollY > 300 ? 100 : 0} style={{ position: 'absolute', height: 120, width }}></BlurView>
+				<AnimatedImage style={[{ height: 120, width }, compactHeaderStyle]} source={{ uri: basic.header }} />
+				<AnimatedBlurView animatedProps={compactHeaderBlurProps} style={{ position: 'absolute', height: 120, width }} />
 			</View>
-			<Image style={[styles.header, { height: Math.max(340, 300 - Math.min(0, scrollY)), marginLeft: padding }]} source={{ uri: basic.header }} />
-			<ScrollView ref={ref as any} onScroll={(e) => setScrollY(e.nativeEvent.contentOffset.y)} style={{ position: 'absolute', width, top: 0, left: padding, right: 0, bottom: 0 }}>
+			<AnimatedImage style={[styles.header, { marginLeft: padding }, headerStyle]} source={{ uri: basic.header }} />
+			<Animated.ScrollView ref={ref} onScroll={onScroll} scrollEventThrottle={16} style={{ position: 'absolute', width, top: 0, left: padding, right: 0, bottom: 0 }}>
 				<View style={styles.headerWrap} />
 				<GlassViewFallback isPreview={isPreview} style={styles.infoBar}>
 					<View style={{ width: 80, justifyContent: 'center', alignItems: 'center' }}>
@@ -257,7 +276,7 @@ export default function Index() {
 						<ProfileUsers type="followers" lang={lang} targetId={basic.id} client={client} acct={acct} columnWidth={width} />
 					</View>
 				)}
-			</ScrollView>
+			</Animated.ScrollView>
 			{client && relation && (
 				<View pointerEvents="box-none" style={styles.sheetOverlay}>
 					<RelationSheet locked={basic.locked} isOpened={rSheet} setIsOpened={setRSheet} update={updateRelation} client={client} relation={relation} targetId={userId} />
