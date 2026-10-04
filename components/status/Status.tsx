@@ -3,7 +3,7 @@ import { ja } from 'date-fns/locale'
 import { SymbolView } from 'expo-symbols'
 import { onTranslateSheet } from 'expo-translate-text'
 import { useRef, useState } from 'react'
-import { ActivityIndicator, PixelRatio, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { ActivityIndicator, Alert, PixelRatio, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import Avatar from '../Avatar'
 import { Text } from '../themed/Text'
 import { AccountName } from './AccountName'
@@ -98,6 +98,8 @@ export const Status = (props: IProps) => {
 			const newStatus = response.data as Entity.Status
 			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 			updateStatus(newStatus.reblog || newStatus)
+		} catch (e) {
+			Alert.alert(t('timeline.action.error'), t('timeline.action.errorMessage'))
 		} finally {
 			setIsProcessing(false)
 		}
@@ -234,11 +236,21 @@ export const Status = (props: IProps) => {
 							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.reblogs_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('fav')}>
-							<SymbolView name={status.favourited ? 'star.fill' : 'star'} type="monochrome" tintColor={status.favourited ? PlatformColor('systemYellow') : actionColor} size={fontSize * 1.2 * fontScale} />
+							<SymbolView
+								name={status.favourited ? 'star.fill' : 'star'}
+								type="monochrome"
+								tintColor={status.favourited ? PlatformColor('systemYellow') : actionColor}
+								size={fontSize * 1.2 * fontScale}
+							/>
 							<Text style={{ marginLeft: 5, color: actionColor }}>{showCount ? status.favourites_count.toLocaleString() : ''}</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={styles.action} onPress={() => action('bookmark')}>
-							<SymbolView name={status.bookmarked ? 'bookmark.fill' : 'bookmark'} type="monochrome" tintColor={status.bookmarked ? PlatformColor('systemRed') : actionColor} size={fontSize * 1.2 * fontScale} />
+							<SymbolView
+								name={status.bookmarked ? 'bookmark.fill' : 'bookmark'}
+								type="monochrome"
+								tintColor={status.bookmarked ? PlatformColor('systemRed') : actionColor}
+								size={fontSize * 1.2 * fontScale}
+							/>
 						</TouchableOpacity>
 						<Dropdown data={otherAction} onSelect={(title) => dropdown(title)} modifiers={[ignoreSafeArea({ regions: 'all' })]}>
 							<SymbolView name="ellipsis" tintColor={actionColor} type="monochrome" size={fontSize * 1.2 * fontScale} />
