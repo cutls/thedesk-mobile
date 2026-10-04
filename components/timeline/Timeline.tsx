@@ -24,6 +24,7 @@ import { ActivityIndicator, AppState, type AppStateStatus, PlatformColor, Refres
 import { Status } from '../status/Status'
 import { Text } from '../themed/Text'
 import { ProgressView } from '../ui/ProgressView'
+import { StreamingIndicator } from './StreamingIndicator'
 interface IProps {
 	timeline: TimelineProps
 	columnWidth: number
@@ -245,7 +246,7 @@ export const Timeline = (props: IProps) => {
 				)}
 			/>
 			{isRefreshing && <ProgressView style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />}
-			{isStreaming && <View pointerEvents="none" style={{ position: 'absolute', top: 4, right: 4, width: 4, height: 4, borderRadius: 2, backgroundColor: 'green', zIndex: 1 }} />}
+			<StreamingIndicator isStreaming={isStreaming && !isRefreshing} />
 		</View>
 	)
 }
