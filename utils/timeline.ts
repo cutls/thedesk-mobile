@@ -21,7 +21,7 @@ export const getStatuses = async (client: MegalodonInterface, type: TimelineKind
 			return { data: response.data, maxId }
 		} else {
 			const link = parseHeader(response.headers.link)
-			const maxId = link.next.urlParams.max_id
+			const maxId = link.next?.urlParams?.max_id
 			return { data: response.data, maxId }
 		}
 	} catch (e) {
