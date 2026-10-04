@@ -127,7 +127,7 @@ export default function Search() {
 		</View>
 	)
 	const emptySection = (section: string) => (
-		<View style={[styles.empty, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+		<GlassView glassEffectStyle="regular" style={[styles.empty, { backgroundColor: colors.surface, borderColor: colors.border }]}>
 			{loading ? (
 				<ActivityIndicator color={colors.accent} accessibilityLabel={t('search.loading')} />
 			) : (
@@ -141,7 +141,7 @@ export default function Search() {
 					)}
 				</>
 			)}
-		</View>
+		</GlassView>
 	)
 
 	return (
@@ -233,7 +233,7 @@ export default function Search() {
 						<View style={styles.section}>
 							{sectionHeading(t(isTrending ? 'search.peopleToDiscover' : 'search.user'), results.people.length)}
 							{results.people.length > 0 && acct ? (
-								<View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+								<GlassView glassEffectStyle="regular" style={[styles.card]}>
 									{results.people.map((person, index) => (
 										<Link key={person.id} href={`/user?acctId=${acct.id}&userId=${person.id}`} push>
 											<Link.Preview style={{ backgroundColor: PlatformColor('systemBackground') }} />
@@ -253,7 +253,7 @@ export default function Search() {
 											</Link.Trigger>
 										</Link>
 									))}
-								</View>
+								</GlassView>
 							) : (
 								emptySection('people')
 							)}
@@ -262,7 +262,7 @@ export default function Search() {
 							{sectionHeading(t(isTrending ? 'search.popularPosts' : 'search.post'), results.posts.length)}
 							{results.posts.length && acct && client
 								? results.posts.map((post) => (
-										<View key={post.id} style={[styles.postCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+										<GlassView key={post.id} glassEffectStyle="regular" style={[styles.postCard]}>
 											<Status
 												status={post}
 												acct={acct}
@@ -285,7 +285,7 @@ export default function Search() {
 													router.push({ pathname: '/post', params: { acctId: account.id, targetId: target.id, statusId: target.id, mode: type, ...(addText !== undefined ? { addText } : {}) } })
 												}}
 											/>
-										</View>
+										</GlassView>
 									))
 								: emptySection('posts')}
 						</View>
