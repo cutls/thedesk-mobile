@@ -1,7 +1,7 @@
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import { type SFSymbol, SymbolView } from 'expo-symbols'
 import React from 'react'
-import { PlatformColor, StyleSheet, useColorScheme, View } from 'react-native'
+import { PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 
 import type { Account } from '@/entities/account'
@@ -43,14 +43,14 @@ const icon = (type: string): SFSymbol => {
 const Banner = ({ acctId, type, who, txtColor, columnWidth }: { acctId: string; type: string; who: Entity.Account | null; txtColor: string; columnWidth: number }) => {
 	const { t } = useTranslation()
 	return (
-		<View style={{ paddingLeft: 10 }}>
-			<Link href={`/user?acctId=${acctId}&userId=${who?.id}`} push>
+		<View style={{ width: columnWidth, paddingHorizontal: 10 }}>
+			<Link href={`/user?acctId=${acctId}&userId=${who?.id}`} push asChild>
 				<Link.Preview style={{ backgroundColor: PlatformColor('systemBackground') }} />
 				<Link.Trigger>
-					<View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 2, width: columnWidth - 22 }}>
+					<TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 2, width: columnWidth - 22, minHeight: 24 }}>
 						<SymbolView name={icon(type)} type="monochrome" size={16} tintColor={txtColor} style={{ width: 20, height: 24, flexShrink: 0 }} />
-						<Text style={{ flex: 1, marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
-					</View>
+						<Text style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
+					</TouchableOpacity>
 				</Link.Trigger>
 			</Link>
 		</View>
