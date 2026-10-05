@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@cutls/galeria": "^100.0.0",
-    "@cutls/megalodon": "7.1.12",
+    "@cutls/megalodon": "7.2.5",
     "@edualm/react-native-now-playing": "^0.2.1",
     "@expo/ui": "~58.0.4",
     "@expo/vector-icons": "^15.0.3",
@@ -28,7 +28,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
-    "@shopify/flash-list": "2.0.2",
+    "@shopify/flash-list": "2.3.3",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
     "color": "^5.0.3",

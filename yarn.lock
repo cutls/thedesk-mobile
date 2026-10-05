@@ -1559,9 +1559,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cutls/megalodon@npm:7.1.12":
-  version: 7.1.12
-  resolution: "@cutls/megalodon@npm:7.1.12"
+"@cutls/megalodon@npm:7.2.5":
+  version: 7.2.5
+  resolution: "@cutls/megalodon@npm:7.2.5"
   dependencies:
     "@badgateway/oauth2-client": "npm:^2.4.2"
     "@types/ws": "npm:^8.18.1"
@@ -1574,7 +1574,7 @@ __metadata:
     object-assign-deep: "npm:^0.4.0"
     uuid: "npm:^11.1.0"
     ws: "npm:8.18.3"
-  checksum: 10c0/074eb02858bbed87bebd4fd027340af05824879b822f8a1b5569594054e61f2e130041d0daf0148456f239d139ba02b4f80c93ff0c6ee7d82cfce0bf299219cd
+  checksum: 10c0/49e338bedb25823d39dd0aa6a68bf22b53d2f659e449f4af343059e2eb2ae91935ad16a056baeed189d617bd6265a15b6bdb474681206df9813f568dcc64c954
   languageName: node
   linkType: hard
 
@@ -3556,16 +3556,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:2.0.2":
-  version: 2.0.2
-  resolution: "@shopify/flash-list@npm:2.0.2"
-  dependencies:
-    tslib: "npm:2.8.1"
+"@shopify/flash-list@npm:2.3.3":
+  version: 2.3.3
+  resolution: "@shopify/flash-list@npm:2.3.3"
   peerDependencies:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/c4e88348ce66e8f51c6213a42574a097d54cebf2125dc3fd8c077f3f7b83e25209c67bcb9a9102a3178c146cf5c23a978febd9a5ed5328ba1d7c663b5a8149d2
+  checksum: 10c0/c94af22f8b034d9f24e8ea3628ac20597cdb00f8c250d24a8e7adb86bc2a41cf10234c2fd87315bf7a34211db87d7eba40bddda610847cb6afedd2d6a1a3ffe5
   languageName: node
   linkType: hard
 
@@ -11916,7 +11914,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.2.0"
     "@cutls/galeria": "npm:^100.0.0"
-    "@cutls/megalodon": "npm:7.1.12"
+    "@cutls/megalodon": "npm:7.2.5"
     "@edualm/react-native-now-playing": "npm:^0.2.1"
     "@expo/ui": "npm:~58.0.4"
     "@expo/vector-icons": "npm:^15.0.3"
@@ -11926,7 +11924,7 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.4.0"
     "@react-navigation/elements": "npm:^2.6.3"
     "@react-navigation/native": "npm:^7.1.8"
-    "@shopify/flash-list": "npm:2.0.2"
+    "@shopify/flash-list": "npm:2.3.3"
     "@types/react": "npm:~19.3.0"
     "@types/semver": "npm:^7"
     "@types/superagent": "npm:^8.1.9"
@@ -12032,7 +12030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2.4.0, tslib@npm:^2.8.1":
+"tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62

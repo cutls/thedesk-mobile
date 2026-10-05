@@ -5,7 +5,6 @@ import { PlatformColor, StyleSheet, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 
 import type { Account } from '@/entities/account'
-import { useWindowSize } from '@/hooks/useWindowSize'
 import { useConfigStore } from '@/utils/store/config'
 import { Link, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -41,17 +40,16 @@ const icon = (type: string): SFSymbol => {
 	if (type === 'quote') return 'quote.bubble'
 	return 'bell'
 }
-const Banner = ({ acctId, type, who, txtColor }: { acctId: string; type: string; who: Entity.Account | null; txtColor: string }) => {
+const Banner = ({ acctId, type, who, txtColor, columnWidth }: { acctId: string; type: string; who: Entity.Account | null; txtColor: string; columnWidth: number }) => {
 	const { t } = useTranslation()
-	const { width } = useWindowSize()
 	return (
 		<View style={{ paddingLeft: 10 }}>
 			<Link href={`/user?acctId=${acctId}&userId=${who?.id}`} push>
 				<Link.Preview style={{ backgroundColor: PlatformColor('systemBackground') }} />
 				<Link.Trigger>
-					<View style={{ flexDirection: 'row', marginTop: 5, marginLeft: 2, width: width - 10 }}>
-						<SymbolView name={icon(type)} type="monochrome" size={16} tintColor={txtColor} />
-						<Text numberOfLines={1} style={{ marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
+					<View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 2, width: columnWidth - 22 }}>
+						<SymbolView name={icon(type)} type="monochrome" size={16} tintColor={txtColor} style={{ width: 20, height: 24, flexShrink: 0 }} />
+						<Text style={{ flex: 1, marginLeft: 2 }}>{t(`timeline.notification.${type}.body`, { user: who?.display_name || who?.acct || '' })}</Text>
 					</View>
 				</Link.Trigger>
 			</Link>
@@ -70,7 +68,7 @@ export const Notification = (props: IProps) => {
 	if (notification.status) {
 		return (
 			<>
-				<Banner acctId={acct.id} type={notification.type} who={notification.account} txtColor={txtColor} />
+				<Banner acctId={acct.id} type={notification.type} who={notification.account} txtColor={txtColor} columnWidth={columnWidth} />
 				<Status
 					status={notification.status}
 					client={client}
@@ -88,7 +86,7 @@ export const Notification = (props: IProps) => {
 	if (notification.account) {
 		return (
 			<>
-				<Banner acctId={acct.id} type={notification.type} who={notification.account} txtColor={txtColor} />
+				<Banner acctId={acct.id} type={notification.type} who={notification.account} txtColor={txtColor} columnWidth={columnWidth} />
 				<User acct={acct} columnWidth={columnWidth} txtColor={txtColor} basic={notification.account} />
 			</>
 		)
