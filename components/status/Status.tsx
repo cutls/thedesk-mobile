@@ -175,6 +175,17 @@ export const Status = (props: IProps) => {
 					</Link>
 				</View>
 			)}
+			{status.in_reply_to_id && (
+				<TouchableOpacity
+					onPress={() => router.push(`/detail?acctId=${acct.id}&statusId=${status.id}`)}
+					activeOpacity={0.7}
+					accessibilityRole="link"
+					style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5, marginBottom: 5, marginLeft: 2, width: columnWidth - 22 }}
+				>
+					<SymbolView name="arrowshape.turn.up.left" type="monochrome" size={16} tintColor={txtColor} style={{ width: 20, height: 24, flexShrink: 0 }} />
+					<Text style={{ flex: 1, marginLeft: 2 }}>{t('timeline.status.reply')}</Text>
+				</TouchableOpacity>
+			)}
 			<View style={{ display: 'flex', flexDirection: 'row' }}>
 				<View style={{ width: avatarSize, alignItems: 'center' }}>
 					<Link href={`/user?acctId=${acct.id}&userId=${basic.id}`} push>

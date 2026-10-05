@@ -185,7 +185,8 @@
 			"pinnedPost": "ピン留めされた投稿",
 			"filtered": "フィルターされました",
 			"showAnyway": "表示する",
-			"rebloggedBy": "{{name}}がブースト"
+			"rebloggedBy": "{{name}}がブースト",
+			"reply": "返信"
 		},
 		"poll": {
 			"vote": "投票",

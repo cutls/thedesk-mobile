@@ -134,7 +134,8 @@
 			"pinnedPost": "Pnned post",
 			"filtered": "Filtered",
 			"showAnyway": "Show anyway",
-			"rebloggedBy": "Boosted by {{name}}"
+			"rebloggedBy": "Boosted by {{name}}",
+			"reply": "Reply"
 		},
 		"poll": {
 			"vote": "Vote",
