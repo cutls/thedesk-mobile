@@ -226,7 +226,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 			)}
 			{mode === 'emoji' && (
 				<TransView>
-					<Emoji client={client} add={(r) => addEmoji(r)} />
+					<Emoji acctId={useAcct?.id ?? null} client={client} add={(r) => addEmoji(r)} />
 				</TransView>
 			)}
 			{mode === 'menu' && (

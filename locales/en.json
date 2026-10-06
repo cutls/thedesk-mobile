@@ -218,6 +218,7 @@
             "direct": "Direct"
         },
         "emoji": {
+            "recent": "Recently used",
             "empty": "No emoji",
             "close": "Close"
         },

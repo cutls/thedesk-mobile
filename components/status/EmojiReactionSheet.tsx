@@ -1,6 +1,9 @@
+import { EmojiHistory } from '@/components/EmojiHistory'
+import { useEmojiHistory } from '@/hooks/useEmojiHistory'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from '@gorhom/bottom-sheet'
+import { GlassView } from 'expo-glass-effect'
 import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
 import { useEffect, useRef, useState } from 'react'
@@ -11,20 +14,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text } from '../themed/Text'
 
 export interface EmojiReactionSheetProps {
+	acctId: string
 	client: MegalodonInterface
 	statusId: string
 	showGif: boolean
 	updateStatus: (status: Entity.Status) => void
 	close: () => void
 }
-
-export default function EmojiReactionSheet({ client, statusId, showGif, updateStatus, close }: EmojiReactionSheetProps) {
+const GlassViewCustom = (props: React.ComponentProps<typeof GlassView>) => <GlassView {...props} style={[props.style, { borderRadius: 20, marginBottom: 5 }]} />
+export default function EmojiReactionSheet({ acctId, client, statusId, showGif, updateStatus, close }: EmojiReactionSheetProps) {
 	const { width, deviceWidth } = useWindowSize()
 	const insets = useSafeAreaInsets()
 	const { t } = useTranslation()
 	const sheetRef = useRef<BottomSheet>(null)
 	const pending = useRef(false)
 	const [emojis, setEmojis] = useState<Entity.Emoji[]>([])
+	const { recentEmojis, recordEmoji } = useEmojiHistory(acctId, emojis)
 	const [isLoading, setIsLoading] = useState(true)
 	const [hasError, setHasError] = useState(false)
 	const [attempt, setAttempt] = useState(0)
@@ -34,6 +39,7 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 
 	useEffect(() => {
 		let active = true
+		setEmojis([])
 		setIsLoading(true)
 		setHasError(false)
 		client.getInstanceCustomEmojis().then(
@@ -51,7 +57,7 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 		return () => {
 			active = false
 		}
-	}, [client, attempt])
+	}, [client, acctId, attempt])
 
 	const react = async (shortcode: string) => {
 		if (pending.current) return
@@ -59,6 +65,7 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 		setIsSubmitting(true)
 		try {
 			const response = await client.createEmojiReaction(statusId, shortcode)
+			recordEmoji(shortcode)
 			updateStatus(response.data.reblog || response.data)
 			void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 			sheetRef.current?.close()
@@ -68,6 +75,20 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 			setIsSubmitting(false)
 		}
 	}
+
+	const renderEmoji = (item: Entity.Emoji) => (
+		<TouchableOpacity
+			accessibilityRole="button"
+			accessibilityLabel={`:${item.shortcode}:`}
+			accessibilityState={{ disabled: isSubmitting }}
+			disabled={isSubmitting}
+			activeOpacity={0.7}
+			onPress={() => react(item.shortcode)}
+			style={{ width: cellSize, height: cellSize, padding: 5, opacity: isSubmitting ? 0.5 : 1 }}
+		>
+			<Image source={{ uri: showGif ? item.url : item.static_url || item.url }} style={styles.image} contentFit="contain" autoplay={showGif} />
+		</TouchableOpacity>
+	)
 
 	return (
 		<Modal transparent animationType="none" onRequestClose={() => sheetRef.current?.close()}>
@@ -80,6 +101,7 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 					enablePanDownToClose
 					topInset={insets.top}
 					onClose={close}
+					backgroundComponent={GlassViewCustom}
 					style={{ marginHorizontal: (deviceWidth - width) / 2 }}
 					backgroundStyle={styles.background}
 					handleIndicatorStyle={styles.handle}
@@ -97,7 +119,8 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 						data={isLoading || hasError ? [] : emojis}
 						numColumns={columns}
 						keyExtractor={(item: Entity.Emoji) => item.shortcode}
-						contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}
+						contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}
+						style={{ backgroundColor: 'transparent', padding: 10, zIndex: 5 }}
 						ListEmptyComponent={
 							<View style={styles.empty}>
 								{isLoading ? (
@@ -114,19 +137,8 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 								)}
 							</View>
 						}
-						renderItem={({ item }: { item: Entity.Emoji }) => (
-							<TouchableOpacity
-								accessibilityRole="button"
-								accessibilityLabel={`:${item.shortcode}:`}
-								accessibilityState={{ disabled: isSubmitting }}
-								disabled={isSubmitting}
-								activeOpacity={0.7}
-								onPress={() => react(item.shortcode)}
-								style={{ width: cellSize, height: cellSize, padding: 5, opacity: isSubmitting ? 0.5 : 1 }}
-							>
-								<Image source={{ uri: showGif ? item.url : item.static_url || item.url }} style={styles.image} contentFit="contain" autoplay={showGif} />
-							</TouchableOpacity>
-						)}
+						ListHeaderComponent={!isLoading && !hasError ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
+						renderItem={({ item }: { item: Entity.Emoji }) => renderEmoji(item)}
 					/>
 				</BottomSheet>
 			</GestureHandlerRootView>
@@ -136,7 +148,7 @@ export default function EmojiReactionSheet({ client, statusId, showGif, updateSt
 
 const styles = StyleSheet.create({
 	root: { flex: 1 },
-	background: { backgroundColor: PlatformColor('systemBackground') },
+	background: { backgroundColor: 'transparent' },
 	handle: { backgroundColor: PlatformColor('secondaryLabel') },
 	header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, gap: 10 },
 	title: { flex: 1, fontSize: 18, fontWeight: 'bold' },

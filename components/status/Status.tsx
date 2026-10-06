@@ -260,7 +260,7 @@ export const Status = (props: IProps) => {
 									style={[styles.reaction, styles.reactionButton]}
 									accessibilityRole="button"
 									accessibilityLabel={t('timeline.actions.emojiReaction')}
-									onPress={() => openReactionSheet({ client, statusId: status.id, showGif, updateStatus })}
+									onPress={() => openReactionSheet({ acctId: acct.id, client, statusId: status.id, showGif, updateStatus })}
 								>
 									<SymbolView name="face.smiling" type="monochrome" tintColor={PlatformColor('label')} size={20 * fontScale} />
 								</TouchableOpacity>

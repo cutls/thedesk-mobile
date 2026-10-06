@@ -273,6 +273,7 @@ export default function Post() {
 			{sheet === 'emoji' && (
 				<ModeSheet close={() => closeSheet('emoji')} scrollable={false}>
 					<Emoji
+						acctId={acct?.id ?? null}
 						client={client}
 						add={(emoji) => {
 							if (emoji) setText((value) => `${value} :${emoji}: `)
