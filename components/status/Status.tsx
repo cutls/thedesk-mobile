@@ -1,5 +1,4 @@
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
-import { useRecyclingState } from '@shopify/flash-list'
 import { ja } from 'date-fns/locale'
 import { Image } from 'expo-image'
 import { SymbolView } from 'expo-symbols'
@@ -24,10 +23,10 @@ import { useTranslation } from 'react-i18next'
 import { Dropdown } from '../ui/Dropdown'
 import { Attachment } from './Attachments'
 import { Card } from './Card'
+import { useEmojiReactionSheet } from './EmojiReactionSheetProvider'
 import { RenderHTML } from './HTML'
 import { Poll } from './Poll'
 import { Quote } from './Quote'
-import EmojiReactionSheet from './EmojiReactionSheet'
 
 type IConfig = Settings['timeline']
 interface IProps {
@@ -76,7 +75,7 @@ export const Status = (props: IProps) => {
 	const actionColor = isDark ? PlatformColor('systemGray2') : PlatformColor('systemGray')
 	const styles = createStyles({ width: columnWidth })
 	const [isOpen, setIsOpen] = useState(false)
-	const [isReactionOpen, setIsReactionOpen] = useRecyclingState(false, [acct.id, status.id])
+	const openReactionSheet = useEmojiReactionSheet()
 	const locale = lang === 'ja' ? ja : undefined
 	const fromNow = calcFromNow(new Date(status.created_at), lang === 'ja')
 	const basic = status.account
@@ -257,8 +256,13 @@ export const Status = (props: IProps) => {
 								)
 							})}
 							{acct.emojiReactions && (
-								<TouchableOpacity style={styles.reaction} accessibilityRole="button" accessibilityLabel={t('timeline.actions.emojiReaction')} onPress={() => setIsReactionOpen(true)}>
-									<SymbolView name="face.smiling" type="monochrome" tintColor={actionColor} size={20 * fontScale} />
+								<TouchableOpacity
+									style={[styles.reaction, styles.reactionButton]}
+									accessibilityRole="button"
+									accessibilityLabel={t('timeline.actions.emojiReaction')}
+									onPress={() => openReactionSheet({ client, statusId: status.id, showGif, updateStatus })}
+								>
+									<SymbolView name="face.smiling" type="monochrome" tintColor={PlatformColor('label')} size={20 * fontScale} />
 								</TouchableOpacity>
 							)}
 						</View>
@@ -295,9 +299,6 @@ export const Status = (props: IProps) => {
 					</View>
 				</View>
 			</View>
-			{acct.emojiReactions && isReactionOpen && (
-				<EmojiReactionSheet key={`${acct.id}:${status.id}`} client={client} statusId={status.id} showGif={showGif} updateStatus={updateStatus} close={() => setIsReactionOpen(false)} />
-			)}
 		</View>
 	)
 }
@@ -308,7 +309,10 @@ const createStyles = ({ width }: { width: number }) =>
 			flexDirection: 'row',
 			flexWrap: 'wrap',
 			gap: 6,
-			marginVertical: 8
+			marginBottom: 8
+		},
+		reactionButton: {
+			backgroundColor: PlatformColor('systemGray4')
 		},
 		reaction: {
 			flexDirection: 'row',

@@ -10,7 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text } from '../themed/Text'
 
-interface Props {
+export interface EmojiReactionSheetProps {
 	client: MegalodonInterface
 	statusId: string
 	showGif: boolean
@@ -18,7 +18,7 @@ interface Props {
 	close: () => void
 }
 
-export default function EmojiReactionSheet({ client, statusId, showGif, updateStatus, close }: Props) {
+export default function EmojiReactionSheet({ client, statusId, showGif, updateStatus, close }: EmojiReactionSheetProps) {
 	const { width, deviceWidth } = useWindowSize()
 	const insets = useSafeAreaInsets()
 	const { t } = useTranslation()
