@@ -48,6 +48,11 @@
 		"deleteAccountConfirmTitle": "Delete Account"
     },
     "timeline": {
+		"edit": {
+			"moveUp": "Move up",
+			"moveDown": "Move down",
+			"saveError": "Could not save timeline changes. Please try again."
+		},
 		"walkthrough": "Tap the + button on bottom to add your first column.",
         "notification": {
 			"follow": {

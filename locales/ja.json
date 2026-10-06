@@ -106,6 +106,11 @@
 		"edit": "編集モード"
 	},
 	"timeline": {
+		"edit": {
+			"moveUp": "上へ移動",
+			"moveDown": "下へ移動",
+			"saveError": "タイムラインの変更を保存できませんでした。もう一度お試しください。"
+		},
 		"walkthrough": "画面下部の＋ボタンをタップして、最初のカラムを追加しましょう。",
 		"notification": {
 			"follow": {

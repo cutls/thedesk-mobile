@@ -7,14 +7,13 @@ import { useTimelineStore } from '@/utils/store/timelines'
 import { makeListTimelineNameWithAcctId, makeTimelineNameWithAcctId } from '@/utils/timelineName'
 import type { IState } from '@/utils/type'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
-import { Host, Label, List } from '@expo/ui/swift-ui'
-import { environment, frame, listStyle } from '@expo/ui/swift-ui/modifiers'
-import RNBottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
+import RNBottomSheet, { BottomSheetBackdrop, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet'
 import { randomUUID } from 'expo-crypto'
 import { GlassView } from 'expo-glass-effect'
+import { SymbolView } from 'expo-symbols'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, PlatformColor, StyleSheet, useColorScheme, View } from 'react-native'
+import { Alert, FlatList, PlatformColor, Pressable, StyleSheet, useColorScheme, View } from 'react-native'
 import Avatar from './Avatar'
 import Acct from './composer/Acct'
 import { Text } from './themed/Text'
@@ -33,13 +32,14 @@ const GlassViewCustom = (props: React.ComponentProps<typeof GlassView>) => <Glas
 export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 	const { t } = useTranslation()
 	const { width } = useWindowSize()
-	const styles = createStyles({ width })
+	const styles = createStyles()
 	const [useAcct, setUseAcct] = useState<Account | null>(null)
 	const colorScheme = useColorScheme()
 	const isDark = colorScheme === 'dark'
 	const textColor = PlatformColor('label')
 	const [client, setClient] = useState<MegalodonInterface | null>(null)
-	const [isLoading, setIsLoading] = useState(false)
+	const [isSaving, setIsSaving] = useState(false)
+	const savingRef = React.useRef(false)
 	const { timelines, setTimelines } = useTimelineStore()
 	const [mode, setMode] = useState('select')
 	const [lists, setLists] = useState<Array<Entity.List>>([])
@@ -112,17 +112,30 @@ export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 		setTimelines([...timelines, newTimeline])
 		setIsOpened(false)
 	}
-	const deleteTimeline = async (tlId: string) => {
-		const updatedTimelines = timelines.filter((tl) => tl.id !== tlId)
-		await saveTimelines(updatedTimelines)
-		setTimelines(updatedTimelines)
+	const updateTimelines = async (updatedTimelines: Timeline[]) => {
+		if (savingRef.current) return
+		savingRef.current = true
+		setIsSaving(true)
+		const selectedId = timelines[context.current]?.id
+		try {
+			await saveTimelines(updatedTimelines)
+			setTimelines(updatedTimelines)
+			const selectedIndex = updatedTimelines.findIndex((tl) => tl.id === selectedId)
+			context.setCurrent(selectedIndex >= 0 ? selectedIndex : Math.max(0, Math.min(context.current, updatedTimelines.length - 1)))
+		} catch {
+			Alert.alert(t('timeline.edit.saveError'))
+		} finally {
+			savingRef.current = false
+			setIsSaving(false)
+		}
 	}
-	const moveTL = async (from: number, to: number) => {
+	const deleteTimeline = (tlId: string) => updateTimelines(timelines.filter((tl) => tl.id !== tlId))
+	const moveTL = (from: number, to: number) => {
+		if (from < 0 || from >= timelines.length || to < 0 || to >= timelines.length) return
 		const updatedTimelines = [...timelines]
 		const item = updatedTimelines.splice(from, 1)[0]
 		updatedTimelines.splice(to, 0, item)
-		await saveTimelines(updatedTimelines)
-		setTimelines(updatedTimelines)
+		return updateTimelines(updatedTimelines)
 	}
 
 	if (!useAcct || !isOpened) return null
@@ -202,19 +215,36 @@ export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 					)}
 					{mode === 'sort' && (
 						<View style={{ height: 400, width: '100%' }}>
-							<Host style={{ flex: 1, backgroundColor: 'transparent' }}>
-								<List
-									onSelectionChange={(items) => console.log(`indexes of selected items: ${items.join(', ')}`)}
-									modifiers={[frame({ width: width }), environment('editMode', 'active'), listStyle('automatic')]}
-								>
-									{timelines.map((tl) => (
-										<List.ForEach onDelete={() => deleteTimeline(tl.id)} key={tl.id} onMove={([from], to) => moveTL(from, to)}>
-											<Label title={tl.name}  modifiers={[frame({ width: width })]} />
-										</List.ForEach>
-									))}
-								</List>
-							</Host>
-							<Button isPrimary={true} width={width} style={{ marginVertical: 10, height: 50 }} onPress={() => setMode('select')} isDark={isDark}>
+							<BottomSheetScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 }}>
+								{timelines.length === 0 && <Text>{t('empty')}</Text>}
+								{timelines.map((tl, index) => (
+									<View key={tl.id} style={styles.sortRow}>
+										<Text style={styles.timelineName} numberOfLines={2}>
+											{tl.name}
+										</Text>
+										{(
+											[
+												{ icon: 'arrow.up', label: t('timeline.edit.moveUp'), disabled: isSaving || index === 0, onPress: () => moveTL(index, index - 1) },
+												{ icon: 'arrow.down', label: t('timeline.edit.moveDown'), disabled: isSaving || index === timelines.length - 1, onPress: () => moveTL(index, index + 1) },
+												{ icon: 'trash', label: t('delete'), disabled: isSaving, onPress: () => deleteTimeline(tl.id) }
+											] as const
+										).map((action) => (
+											<Pressable
+												key={action.icon}
+												onPress={action.onPress}
+												disabled={action.disabled}
+												accessibilityRole="button"
+												accessibilityLabel={`${action.label}: ${tl.name}`}
+												accessibilityState={{ disabled: action.disabled }}
+												style={({ pressed }) => [styles.sortAction, { opacity: action.disabled ? 0.3 : pressed ? 0.5 : 1 }]}
+											>
+												<SymbolView name={action.icon} size={20} tintColor={action.icon === 'trash' ? PlatformColor('systemRed') : textColor} />
+											</Pressable>
+										))}
+									</View>
+								))}
+							</BottomSheetScrollView>
+							<Button disabled={isSaving} isPrimary={true} width={width} style={{ marginVertical: 10, height: 50 }} onPress={() => setMode('select')} isDark={isDark}>
 								{t('ok')}
 							</Button>
 						</View>
@@ -226,8 +256,25 @@ export default function AddTimeline({ isOpened, setIsOpened, context }: Props) {
 	)
 }
 
-const createStyles = ({ width }: { width: number }) =>
+const createStyles = () =>
 	StyleSheet.create({
+		sortRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: 8,
+			borderBottomWidth: StyleSheet.hairlineWidth,
+			borderBottomColor: PlatformColor('separator')
+		},
+		timelineName: {
+			flex: 1,
+			marginRight: 8
+		},
+		sortAction: {
+			width: 44,
+			height: 44,
+			alignItems: 'center',
+			justifyContent: 'center'
+		},
 		acctContainer: {
 			flexDirection: 'row',
 			alignItems: 'center',
