@@ -1,14 +1,15 @@
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import { type SFSymbol, SymbolView } from 'expo-symbols'
-import React from 'react'
-import { PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { Alert, PlatformColor, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 
 import type { Account } from '@/entities/account'
 import { useConfigStore } from '@/utils/store/config'
-import { Link, useRouter } from 'expo-router'
+import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { User } from '../profile/User'
+import { CustomedButton } from '../ui/CustomedButton'
 import { Status } from './Status'
 
 type IConfig = {}
@@ -56,15 +57,53 @@ const Banner = ({ acctId, type, who, txtColor, columnWidth }: { acctId: string; 
 		</View>
 	)
 }
+const FollowRequestActions = ({ client, targetId, columnWidth }: { client: MegalodonInterface; targetId: string; columnWidth: number }) => {
+	const { t } = useTranslation()
+	const [isLoading, setIsLoading] = useState(false)
+	const [isResolved, setIsResolved] = useState(false)
+	const pendingAction = useRef(false)
+	// CustomedButton subtracts 40 from its width prop; allow for padding and the row gap.
+	const requestButtonWidth = (columnWidth - 20 - 10) / 2 + 40
+	const respond = async (accept: boolean) => {
+		if (pendingAction.current || isResolved) return
+		pendingAction.current = true
+		setIsLoading(true)
+		try {
+			if (accept) await client.acceptFollowRequest(targetId)
+			else await client.rejectFollowRequest(targetId)
+			setIsResolved(true)
+		} catch (error) {
+			Alert.alert(t('screen.user'), String(error))
+		} finally {
+			pendingAction.current = false
+			setIsLoading(false)
+		}
+	}
+	if (isResolved) return null
+	return (
+		<View style={[styles.requestContainer, { width: columnWidth }]}>
+			<Text>{t('user.requestedBy')}</Text>
+			<View style={styles.requestActions}>
+				<CustomedButton width={requestButtonWidth} style={styles.requestButton} isLoading={isLoading} onPress={() => respond(true)}>
+					<Text style={styles.buttonText}>{t('user.accept')}</Text>
+				</CustomedButton>
+				<CustomedButton width={requestButtonWidth} style={styles.requestButton} isLoading={isLoading} onPress={() => respond(false)}>
+					<Text style={styles.buttonText}>{t('user.reject')}</Text>
+				</CustomedButton>
+			</View>
+		</View>
+	)
+}
 export const Notification = (props: IProps) => {
 	const { status: notification, client, columnWidth, lang, updateStatus, acct, composeAction, filters } = props
-	const { t } = useTranslation()
-	const router = useRouter()
 	const { config } = useConfigStore()
 
 	const theme = useColorScheme()
 	const isDark = theme === 'dark'
 	const txtColor = isDark ? 'white' : 'black'
+	const requestActions = notification.type === 'follow_request' && notification.account && (
+		<FollowRequestActions key={`${acct.id}:${notification.id}`} client={client} targetId={notification.account.id} columnWidth={columnWidth} />
+	)
 	if (notification.status) {
 		return (
 			<>
@@ -80,6 +119,7 @@ export const Notification = (props: IProps) => {
 					config={config.timeline}
 					filters={filters}
 				/>
+				{requestActions}
 			</>
 		)
 	}
@@ -88,10 +128,16 @@ export const Notification = (props: IProps) => {
 			<>
 				<Banner acctId={acct.id} type={notification.type} who={notification.account} txtColor={txtColor} columnWidth={columnWidth} />
 				<User acct={acct} columnWidth={columnWidth} txtColor={txtColor} basic={notification.account} />
+				{requestActions}
 			</>
 		)
 	}
 	return null
 }
 
-const createStyles = ({ width }: { width: number }) => StyleSheet.create({})
+const styles = StyleSheet.create({
+	requestContainer: { padding: 10, gap: 10 },
+	requestActions: { flexDirection: 'row', gap: 10 },
+	requestButton: { flex: 1, flexShrink: 1, minHeight: 50, padding: 10, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+	buttonText: { fontSize: 18, textAlign: 'center' }
+})
