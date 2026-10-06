@@ -14,7 +14,8 @@
     "build:dev": "eas build --platform ios --profile development --local",
     "build:simulator": "eas build --platform ios --profile preview --local",
     "build:realDevice": "eas build --platform ios --profile realDevice --local",
-    "build": "eas build --platform ios --profile production --local"
+    "build": "eas build --platform ios --profile production --local",
+    "build:submit": "eas build --platform ios --profile production --local --auto-submit"
   },
   "dependencies": {
     "@cutls/galeria": "^100.0.0",

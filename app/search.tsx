@@ -1,4 +1,5 @@
 import Avatar from '@/components/Avatar'
+import Acct from '@/components/composer/Acct'
 import { Status } from '@/components/status/Status'
 import { Text } from '@/components/themed/Text'
 import type { Account } from '@/entities/account'
@@ -43,6 +44,7 @@ export default function Search() {
 	const colors = palettes[useColorScheme() === 'dark' ? 'dark' : 'light']
 	const { config } = useConfigStore()
 	const [acct, setAcct] = useState<Account | null>(null)
+	const [choosingAccount, setChoosingAccount] = useState(false)
 	const [client, setClient] = useState<MegalodonInterface>()
 	const [query, setQuery] = useState('')
 	const [submittedQuery, setSubmittedQuery] = useState('')
@@ -52,6 +54,7 @@ export default function Search() {
 	const [failed, setFailed] = useState<string[]>([])
 	const [focused, setFocused] = useState(false)
 	const requestId = useRef(0)
+	const submittedQueryRef = useRef('')
 	const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null)
 	const isTrending = !submittedQuery
 	const contentWidth = width - 40
@@ -81,9 +84,8 @@ export default function Search() {
 		setAccountError(false)
 		setAcct(null)
 		setClient(undefined)
-		setQuery('')
-		setSubmittedQuery('')
 		setResults(emptyResults)
+		setFailed([])
 		const initialize = async () => {
 			try {
 				const account = acctId ? await getAcctById(acctId) : (await listAccts())[0]
@@ -96,7 +98,7 @@ export default function Search() {
 				const api = generator(account.sns, `https://${account.domain}`, account.accessToken)
 				setAcct(account)
 				setClient(api)
-				await load(api, '')
+				await load(api, submittedQueryRef.current)
 			} catch {
 				if (active) {
 					setAccountError(true)
@@ -117,6 +119,7 @@ export default function Search() {
 		Keyboard.dismiss()
 		setQuery(trimmed)
 		setSubmittedQuery(trimmed)
+		submittedQueryRef.current = trimmed
 		scrollRef.current?.scrollTo({ y: 0, animated: true })
 		void load(client, trimmed)
 	}
@@ -153,6 +156,45 @@ export default function Search() {
 				contentContainerStyle={[styles.content, { width }]}
 				refreshControl={<RefreshControl refreshing={loading && !!client} onRefresh={() => client && void load(client, submittedQuery)} tintColor={colors.accent} />}
 			>
+				<Pressable
+					accessibilityRole="button"
+					accessibilityLabel={t('search.chooseAccount')}
+					accessibilityValue={{ text: acct ? `${acct.username}@${acct.domain}` : undefined }}
+					accessibilityState={{ expanded: choosingAccount }}
+					onPress={() => {
+						Keyboard.dismiss()
+						setChoosingAccount((previous) => !previous)
+					}}
+					style={styles.accountSelector}
+				>
+					{acct && <Avatar src={acct.avatar || acct.favicon} color={acct.color} fallback={acct.sns} size={32} />}
+					<View style={styles.flex}>
+						<Text style={[styles.link, { color: colors.accent }]}>{t('search.chooseAccount')}</Text>
+						{acct && (
+							<Text numberOfLines={1} style={[styles.meta, { color: colors.text }]}>
+								{acct.username}@{acct.domain}
+							</Text>
+						)}
+					</View>
+					<SymbolView type="monochrome" name={choosingAccount ? 'chevron.up' : 'chevron.down'} size={16} tintColor={colors.muted} />
+				</Pressable>
+				{choosingAccount && (
+					<GlassView glassEffectStyle="regular" style={styles.accountPicker}>
+						<Acct
+							change={(account) => {
+								setChoosingAccount(false)
+								if (account.id === acct?.id || account.id === acctId) return
+								requestId.current++
+								setResults(emptyResults)
+								setClient(undefined)
+								setAcct(null)
+								setLoading(true)
+								scrollRef.current?.scrollTo({ y: 0, animated: true })
+								router.setParams({ acctId: account.id })
+							}}
+						/>
+					</GlassView>
+				)}
 				<GlassView glassEffectStyle="regular" style={[styles.searchBox]}>
 					<SymbolView type="monochrome" name="magnifyingglass" size={21} tintColor={focused ? colors.accent : colors.muted} />
 					<TextInput
@@ -299,6 +341,8 @@ export default function Search() {
 const styles = StyleSheet.create({
 	screen: { flex: 1 },
 	content: { alignSelf: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 48 },
+	accountSelector: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, marginBottom: 12 },
+	accountPicker: { borderRadius: 20, paddingHorizontal: 16, marginBottom: 12 },
 	searchBox: { flexDirection: 'row', alignItems: 'center', borderWidth: 0, borderRadius: 28, paddingLeft: 18, paddingRight: 8, minHeight: 56, gap: 10, marginBottom: 22 },
 	input: { flex: 1, minWidth: 0, fontSize: 14, paddingVertical: 16 },
 	inputAction: { width: 32, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
