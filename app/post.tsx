@@ -188,7 +188,7 @@ export default function Post() {
 		Keyboard.dismiss()
 		try {
 			const { editTargetId, ...options } = optional
-			const data = { ...options, spoiler_text: cw || undefined, visibility: vis, media_ids: uploaded.map((attachment) => attachment.id) }
+			const data = { ...options, spoiler_text: cw || undefined, visibility: vis, quote_approval_policy: quoteApproval, media_ids: uploaded.map((attachment) => attachment.id) }
 			if (editTargetId) await client.editStatus(editTargetId, { status: text, ...data })
 			else await client.postStatus(text, data)
 			setHasUnsavedChanges(false)

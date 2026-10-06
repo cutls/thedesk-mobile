@@ -166,6 +166,10 @@
 			"unread": "{{count}} 件の未読通知 (クリックして既読にする)"
 		},
 		"reaction": {
+			"nativeEmoji": "標準の絵文字",
+			"emojiPlaceholder": "絵文字を入力",
+			"singleEmojiHint": "絵文字を1つ入力してください。文字からの変換も利用できます。",
+			"add": "リアクション",
 			"loadError": "絵文字を読み込めませんでした。",
 			"submitError": "リアクションを追加できませんでした。もう一度お試しください。",
 			"retry": "再試行"

@@ -94,6 +94,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 					...optional,
 					spoiler_text: cw || undefined,
 					visibility: vis,
+					quote_approval_policy: quoteApproval,
 					media_ids: uploaded.map((u) => u.id)
 				}
 				await client?.postStatus(text, postData)

@@ -48,8 +48,10 @@ const data = [
 	{ value: 'private', systemImage: 'person.2.fill' as const },
 	{ value: 'direct', systemImage: 'envelope.fill' as const }
 ]
-const actions = [
+const quotableActions = [
 	{ title: 'timeline.action.quote', value: 'quote', systemImage: 'quote.bubble' as const },
+]
+const actions = [
 	{ title: 'timeline.action.translate', value: 'translate', systemImage: 'translate' as const },
 	{ title: 'timeline.action.onOtherAcct', value: 'onOtherAcct', systemImage: 'person.and.arrow.left.and.arrow.right.outward' as const },
 	{ title: 'timeline.action.copyUrl', value: 'copyUrl', systemImage: 'link' as const },
@@ -70,6 +72,7 @@ export const Status = (props: IProps) => {
 	const router = useRouter()
 	const dropdownRef = useRef<View>(null)
 	const [isProcessing, setIsProcessing] = useState(false)
+	const reactionPending = useRef(false)
 	const isDark = theme === 'dark'
 	const txtColor = isDark ? 'white' : 'black'
 	const actionColor = isDark ? PlatformColor('systemGray2') : PlatformColor('systemGray')
@@ -104,6 +107,21 @@ export const Status = (props: IProps) => {
 		} catch (e) {
 			Alert.alert(t('timeline.action.error'), t('timeline.action.errorMessage'))
 		} finally {
+			setIsProcessing(false)
+		}
+	}
+	const toggleReaction = async (reaction: NonNullable<Entity.Status['emoji_reactions']>[number]) => {
+		if (reactionPending.current || isProcessing) return
+		reactionPending.current = true
+		setIsProcessing(true)
+		try {
+			const response = reaction.me ? await client.deleteEmojiReaction(status.id, reaction.name) : await client.createEmojiReaction(status.id, reaction.name)
+			updateStatus(response.data.reblog || response.data)
+			void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+		} catch {
+			Alert.alert(t('timeline.action.error'), t('timeline.action.errorMessage'))
+		} finally {
+			reactionPending.current = false
 			setIsProcessing(false)
 		}
 	}
@@ -151,8 +169,9 @@ export const Status = (props: IProps) => {
 		}
 		if (d === 'copyText') router.push(`/copy?acctId=${acct.id}&statusId=${status.id}`)
 	}
-
-	const otherAction = isMe ? [...actions, ...actionOnlyMe] : actions
+	const quotable = acct.quoteSupport && (status.quote_approval?.current_user === 'automatic' || status.quote_approval?.current_user === 'manual')
+	const otherAction1 = isMe ? [...actions, ...actionOnlyMe] : actions
+	const otherAction = quotable ? [...quotableActions, ...otherAction1] : otherAction1
 	if (isFiltered) {
 		return (
 			<View style={{ width: columnWidth, paddingHorizontal: 10, paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
@@ -245,14 +264,23 @@ export const Status = (props: IProps) => {
 							{status.emoji_reactions?.map((reaction) => {
 								const imageUrl = showGif ? reaction.url || reaction.static_url : reaction.static_url || reaction.url
 								return (
-									<View key={reaction.name} style={styles.reaction} accessible accessibilityLabel={`${reaction.name}: ${reaction.count.toLocaleString()}`}>
+									<TouchableOpacity
+										key={reaction.name}
+										style={[styles.reaction, reaction.me && styles.reactionSelected]}
+										activeOpacity={0.7}
+										accessibilityRole="button"
+										accessibilityLabel={`${reaction.name}: ${reaction.count.toLocaleString()}`}
+										accessibilityState={{ selected: !!reaction.me, disabled: isProcessing }}
+										disabled={isProcessing}
+										onPress={() => toggleReaction(reaction)}
+									>
 										{imageUrl ? (
 											<Image source={{ uri: imageUrl }} style={{ width: 20 * fontScale, height: 20 * fontScale }} contentFit="contain" autoplay={showGif} />
 										) : (
 											<Text style={{ fontSize: 20, flexShrink: 1 }}>{reaction.name}</Text>
 										)}
 										<Text style={{ fontSize }}>{reaction.count.toLocaleString()}</Text>
-									</View>
+									</TouchableOpacity>
 								)
 							})}
 							{acct.emojiReactions && (
@@ -312,6 +340,9 @@ const createStyles = ({ width }: { width: number }) =>
 			marginBottom: 8
 		},
 		reactionButton: {
+			backgroundColor: PlatformColor('systemGray4')
+		},
+		reactionSelected: {
 			backgroundColor: PlatformColor('systemGray4')
 		},
 		reaction: {

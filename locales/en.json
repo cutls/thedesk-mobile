@@ -108,6 +108,10 @@
 			"unread": "{count} unread notifications (Click to mark as read)"
 		},
 		"reaction": {
+			"nativeEmoji": "Standard emoji",
+			"emojiPlaceholder": "Enter an emoji",
+			"singleEmojiHint": "Enter exactly one emoji to react. Text conversion is supported.",
+			"add": "React",
 			"loadError": "Could not load emoji.",
 			"submitError": "Could not add the reaction. Please try again.",
 			"retry": "Try again"

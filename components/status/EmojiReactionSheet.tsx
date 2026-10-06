@@ -1,6 +1,7 @@
 import { EmojiHistory } from '@/components/EmojiHistory'
 import { useEmojiHistory } from '@/hooks/useEmojiHistory'
 import { useWindowSize } from '@/hooks/useWindowSize'
+import { isSingleEmoji } from '@/utils/isSingleEmoji'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from '@gorhom/bottom-sheet'
 import { GlassView } from 'expo-glass-effect'
@@ -8,7 +9,7 @@ import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, Modal, PlatformColor, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Modal, Platform, PlatformColor, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text } from '../themed/Text'
@@ -34,6 +35,8 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 	const [hasError, setHasError] = useState(false)
 	const [attempt, setAttempt] = useState(0)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [emojiInput, setEmojiInput] = useState('')
+	const canSubmitEmoji = isSingleEmoji(emojiInput) && !isSubmitting
 	const columns = Math.max(1, Math.min(8, Math.floor((width - 40) / 44)))
 	const cellSize = (width - 40) / columns
 
@@ -59,21 +62,26 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 		}
 	}, [client, acctId, attempt])
 
-	const react = async (shortcode: string) => {
+	const react = async (shortcode: string, custom = true) => {
 		if (pending.current) return
 		pending.current = true
 		setIsSubmitting(true)
 		try {
 			const response = await client.createEmojiReaction(statusId, shortcode)
-			recordEmoji(shortcode)
+			if (custom) recordEmoji(shortcode)
 			updateStatus(response.data.reblog || response.data)
 			void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+			Keyboard.dismiss()
 			sheetRef.current?.close()
 		} catch {
 			Alert.alert(t('timeline.actions.emojiReaction'), t('timeline.reaction.submitError'))
 			pending.current = false
 			setIsSubmitting(false)
 		}
+	}
+
+	const submitEmoji = (value: string) => {
+		if (isSingleEmoji(value)) void react(value, false)
 	}
 
 	const renderEmoji = (item: Entity.Emoji) => (
@@ -93,54 +101,88 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 	return (
 		<Modal transparent animationType="none" onRequestClose={() => sheetRef.current?.close()}>
 			<GestureHandlerRootView style={styles.root}>
-				<BottomSheet
-					ref={sheetRef}
-					index={0}
-					snapPoints={['60%', '90%']}
-					enableDynamicSizing={false}
-					enablePanDownToClose
-					topInset={insets.top}
-					onClose={close}
-					backgroundComponent={GlassViewCustom}
-					style={{ marginHorizontal: (deviceWidth - width) / 2 }}
-					backgroundStyle={styles.background}
-					handleIndicatorStyle={styles.handle}
-					backdropComponent={(props) => <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />}
-				>
-					<View style={styles.header}>
-						<Text style={styles.title}>{t('timeline.actions.emojiReaction')}</Text>
-						{isSubmitting && <ActivityIndicator />}
-						<TouchableOpacity accessibilityRole="button" onPress={() => sheetRef.current?.close()} style={styles.close}>
-							<Text>{t('composer.emoji.close')}</Text>
-						</TouchableOpacity>
-					</View>
-					<BottomSheetFlatList
-						key={columns}
-						data={isLoading || hasError ? [] : emojis}
-						numColumns={columns}
-						keyExtractor={(item: Entity.Emoji) => item.shortcode}
-						contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}
-						style={{ backgroundColor: 'transparent', padding: 10, zIndex: 5 }}
-						ListEmptyComponent={
-							<View style={styles.empty}>
-								{isLoading ? (
-									<ActivityIndicator />
-								) : hasError ? (
-									<>
-										<Text>{t('timeline.reaction.loadError')}</Text>
-										<TouchableOpacity accessibilityRole="button" style={styles.close} onPress={() => setAttempt((value) => value + 1)}>
-											<Text>{t('timeline.reaction.retry')}</Text>
-										</TouchableOpacity>
-									</>
-								) : (
-									<Text>{t('composer.emoji.empty')}</Text>
-								)}
+				<KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+					<View style={styles.root}>
+						<BottomSheet
+							ref={sheetRef}
+							index={0}
+							snapPoints={['60%', '90%']}
+							enableDynamicSizing={false}
+							enablePanDownToClose
+							topInset={insets.top}
+							onClose={close}
+							backgroundComponent={GlassViewCustom}
+							style={{ marginHorizontal: (deviceWidth - width) / 2 }}
+							backgroundStyle={styles.background}
+							handleIndicatorStyle={styles.handle}
+							backdropComponent={(props) => <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />}
+						>
+							<View style={styles.header}>
+								<Text style={styles.title}>{t('timeline.actions.emojiReaction')}</Text>
+								{isSubmitting && <ActivityIndicator />}
+								<TouchableOpacity accessibilityRole="button" onPress={() => sheetRef.current?.close()} style={styles.close}>
+									<Text>{t('composer.emoji.close')}</Text>
+								</TouchableOpacity>
 							</View>
-						}
-						ListHeaderComponent={!isLoading && !hasError ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
-						renderItem={({ item }: { item: Entity.Emoji }) => renderEmoji(item)}
-					/>
-				</BottomSheet>
+							<View style={styles.nativeEmoji}>
+								<Text>{t('timeline.reaction.nativeEmoji')}</Text>
+								<View style={styles.inputRow}>
+									<TextInput
+										style={styles.input}
+										accessibilityLabel={t('timeline.reaction.nativeEmoji')}
+										placeholder={t('timeline.reaction.emojiPlaceholder')}
+										placeholderTextColor={PlatformColor('placeholderText')}
+										value={emojiInput}
+										// Preserve the IME draft; maxLength and filtering would break conversion and joined emoji.
+										onChangeText={setEmojiInput}
+										editable={!isSubmitting}
+										autoCapitalize="none"
+										returnKeyType="done"
+										onSubmitEditing={(event) => submitEmoji(event.nativeEvent.text)}
+									/>
+									<TouchableOpacity
+										style={[styles.submit, { opacity: canSubmitEmoji ? 1 : 0.4 }]}
+										accessibilityRole="button"
+										accessibilityState={{ disabled: !canSubmitEmoji }}
+										disabled={!canSubmitEmoji}
+										onPress={() => submitEmoji(emojiInput)}
+									>
+										<Text>{t('timeline.reaction.add')}</Text>
+									</TouchableOpacity>
+								</View>
+								<Text style={styles.hint}>{t('timeline.reaction.singleEmojiHint')}</Text>
+							</View>
+							<BottomSheetFlatList
+								key={columns}
+								data={isLoading || hasError ? [] : emojis}
+								numColumns={columns}
+								keyboardShouldPersistTaps="handled"
+								keyboardDismissMode="on-drag"
+								keyExtractor={(item: Entity.Emoji) => item.shortcode}
+								contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}
+								style={{ backgroundColor: 'transparent', padding: 10, zIndex: 5 }}
+								ListEmptyComponent={
+									<View style={styles.empty}>
+										{isLoading ? (
+											<ActivityIndicator />
+										) : hasError ? (
+											<>
+												<Text>{t('timeline.reaction.loadError')}</Text>
+												<TouchableOpacity accessibilityRole="button" style={styles.close} onPress={() => setAttempt((value) => value + 1)}>
+													<Text>{t('timeline.reaction.retry')}</Text>
+												</TouchableOpacity>
+											</>
+										) : (
+											<Text>{t('composer.emoji.empty')}</Text>
+										)}
+									</View>
+								}
+								ListHeaderComponent={!isLoading && !hasError ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
+								renderItem={({ item }: { item: Entity.Emoji }) => renderEmoji(item)}
+							/>
+						</BottomSheet>
+					</View>
+				</KeyboardAvoidingView>
 			</GestureHandlerRootView>
 		</Modal>
 	)
@@ -148,6 +190,20 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 
 const styles = StyleSheet.create({
 	root: { flex: 1 },
+	nativeEmoji: { paddingHorizontal: 20, paddingBottom: 12, gap: 6 },
+	inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+	input: {
+		flex: 1,
+		minHeight: 44,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 8,
+		backgroundColor: PlatformColor('secondarySystemBackground'),
+		color: PlatformColor('label'),
+		fontSize: 20
+	},
+	submit: { minHeight: 44, paddingHorizontal: 16, justifyContent: 'center', borderRadius: 8, backgroundColor: PlatformColor('systemGray4') },
+	hint: { fontSize: 12, color: PlatformColor('secondaryLabel') },
 	background: { backgroundColor: 'transparent' },
 	handle: { backgroundColor: PlatformColor('secondaryLabel') },
 	header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, gap: 10 },
