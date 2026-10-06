@@ -1,5 +1,6 @@
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import { ja } from 'date-fns/locale'
+import { Image } from 'expo-image'
 import { SymbolView } from 'expo-symbols'
 import { onTranslateSheet } from 'expo-translate-text'
 import { useRef, useState } from 'react'
@@ -237,6 +238,23 @@ export const Status = (props: IProps) => {
 					{status.card && <Card card={status.card} columnWidth={columnWidth - left} />}
 					<Attachment attachments={status.media_attachments} width={columnWidth - left} isSensitive={status.sensitive} config={props.config} />
 					{status.poll || status.quote_status || status.card || status.media_attachments.length > 0 ? <View style={{ height: 10 }} /> : null}
+					{!!status.emoji_reactions?.length && (
+						<View style={[styles.reactions, { width: columnWidth - left }]}>
+							{status.emoji_reactions.map((reaction) => {
+								const imageUrl = showGif ? reaction.url || reaction.static_url : reaction.static_url || reaction.url
+								return (
+									<View key={reaction.name} style={styles.reaction} accessible accessibilityLabel={`${reaction.name}: ${reaction.count.toLocaleString()}`}>
+										{imageUrl ? (
+											<Image source={{ uri: imageUrl }} style={{ width: 20 * fontScale, height: 20 * fontScale }} contentFit="contain" autoplay={showGif} />
+										) : (
+											<Text style={{ fontSize: 20, flexShrink: 1 }}>{reaction.name}</Text>
+										)}
+										<Text style={{ fontSize }}>{reaction.count.toLocaleString()}</Text>
+									</View>
+								)
+							})}
+						</View>
+					)}
 					<View style={{ display: 'flex', flexDirection: 'row', marginBottom: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
 						<TouchableOpacity style={styles.action} onPress={() => composeAction(client, acct, 'reply', status)}>
 							<SymbolView name="bubble" type="monochrome" tintColor={actionColor} size={fontSize * 1.2 * fontScale} />
@@ -275,6 +293,22 @@ export const Status = (props: IProps) => {
 
 const createStyles = ({ width }: { width: number }) =>
 	StyleSheet.create({
+		reactions: {
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+			gap: 6,
+			marginVertical: 8
+		},
+		reaction: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 4,
+			maxWidth: '100%',
+			paddingHorizontal: 8,
+			paddingVertical: 4,
+			borderRadius: 8,
+			backgroundColor: PlatformColor('secondarySystemBackground')
+		},
 		cwWrap: {
 			flexDirection: 'row',
 			display: 'flex',
