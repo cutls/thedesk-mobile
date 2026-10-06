@@ -3,7 +3,7 @@ import ISC from '@/components/license/isc'
 import MIT from '@/components/license/mit'
 import { Text } from '@/components/themed/Text'
 import { useWindowSize } from '@/hooks/useWindowSize'
-import Constants from 'expo-constants'
+import * as Application from 'expo-application'
 import { GlassView } from 'expo-glass-effect'
 import { Image } from 'expo-image'
 import { openBrowserAsync } from 'expo-web-browser'
@@ -18,7 +18,7 @@ export default function About() {
 			<View style={{ alignItems: 'center', marginBottom: 20, flexDirection: 'column' }}>
 				<Image source={logo} style={{ width: 100, height: 100 }} contentFit="contain" />
 				<Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 5 }}>TheDesk (mobile)</Text>
-				<Text style={{ marginBottom: 15 }}>v{Constants.manifest2?.runtimeVersion}</Text>
+				<Text style={{ marginBottom: 15 }}>v{Application.nativeApplicationVersion}</Text>
 				<Text>This app is licensed under the Apache 2.0 License.</Text>
 				<TouchableOpacity activeOpacity={0.7} onPress={() => openBrowserAsync('https://github.com/cutls/thedesk-mobile')}>
 					<Text style={{ color: PlatformColor('systemBlue'), textDecorationLine: 'underline' }}>Source code</Text>
