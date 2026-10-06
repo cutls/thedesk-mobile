@@ -72,6 +72,12 @@
 			"close": "閉じる"
 		},
 		"menu": {
+			"quoteApproval": {
+				"label": "この投稿を引用できる人",
+				"public": "誰でも",
+				"followers": "フォロワー",
+				"nobody": "誰も許可しない"
+			},
 			"poll": "投票を作成",
 			"schedule": "時間指定投稿",
 			"return": "投稿画面に戻る"

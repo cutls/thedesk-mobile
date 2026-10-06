@@ -6,24 +6,31 @@ import type { Entity, MegalodonInterface } from '@cutls/megalodon'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import { useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, PlatformColor, StyleSheet, useColorScheme, View } from 'react-native'
+import { ActivityIndicator, Alert, useColorScheme, View } from 'react-native'
 import { Text } from '../themed/Text'
 import { Button, CustomButton } from '../ui/Button'
+import { Dropdown } from '../ui/Dropdown'
+
+type QuoteApproval = 'public' | 'followers' | 'nobody'
+const quoteApprovalOptions: { title: string; value: QuoteApproval }[] = [
+	{ title: 'composer.menu.quoteApproval.public', value: 'public' },
+	{ title: 'composer.menu.quoteApproval.followers', value: 'followers' },
+	{ title: 'composer.menu.quoteApproval.nobody', value: 'nobody' }
+]
 
 interface Props {
 	changeMode: (m: ComposeMode) => void
 	client: MegalodonInterface | null
 	npSet: { setText: IState<string>; setUploaded: IState<Array<Entity.Attachment | Entity.AsyncAttachment>> }
+	quoteApprovalState?: { quoteApproval: QuoteApproval; setQuoteApproval: IState<QuoteApproval> }
 	inSheet?: boolean
 }
-export default function Menu({ changeMode, npSet, client, inSheet }: Props) {
+export default function Menu({ changeMode, npSet, client, inSheet, quoteApprovalState }: Props) {
 	const { t } = useTranslation()
 	const { config } = useConfigStore()
 	const { width } = useWindowSize()
-	const styles = createStyles({ width })
 	const colorScheme = useColorScheme()
 	const isDark = colorScheme === 'dark'
-	const textColor = PlatformColor('label')
 	const { playing } = useContext(NowPlayingContext)
 	const [isSpotifyLoading, setIsSpotifyLoading] = useState(false)
 	const np = async (type: 'apple' | 'spotify') => {
@@ -63,20 +70,28 @@ export default function Menu({ changeMode, npSet, client, inSheet }: Props) {
 			<Button width={width - 40} isDark={isDark} onPress={() => changeMode('schedule')} style={{ marginVertical: 10, height: 50 }}>
 				{t('composer.menu.schedule')}
 			</Button>
-			{inSheet && <Button isPrimary={true} width={width - 40} isDark={isDark} onPress={() => changeMode('compose')} style={{ height: 50 }}>
-				{t('composer.menu.return')}
-			</Button>}
+			{quoteApprovalState && (
+				<>
+					<Text style={{ fontWeight: 'bold', marginBottom: 5 }}>{t('composer.menu.quoteApproval.label')}</Text>
+					<Dropdown
+						data={quoteApprovalOptions.map((option) => ({ ...option, systemImage: option.value === quoteApprovalState.quoteApproval ? ('checkmark' as const) : undefined }))}
+						onSelect={(value) => {
+							const option = quoteApprovalOptions.find((option) => option.value === value)
+							if (option) quoteApprovalState.setQuoteApproval(option.value)
+						}}
+						style={{ height: 50, marginBottom: 10 }}
+					>
+						<Button width={width - 40} isDark={isDark} systemImage="quote.bubble" style={{ height: 50 }}>
+							{t(`composer.menu.quoteApproval.${quoteApprovalState.quoteApproval}`)}
+						</Button>
+					</Dropdown>
+				</>
+			)}
+			{inSheet && (
+				<Button isPrimary={true} width={width - 40} isDark={isDark} onPress={() => changeMode('compose')} style={{ height: 50 }}>
+					{t('composer.menu.return')}
+				</Button>
+			)}
 		</View>
 	)
 }
-const createStyles = ({ width }: { width: number }) =>
-	StyleSheet.create({
-		btn: {
-			height: 50,
-			marginVertical: 10,
-			display: 'flex',
-			justifyContent: 'center',
-			alignContent: 'center',
-			width: width - 40
-		}
-	})

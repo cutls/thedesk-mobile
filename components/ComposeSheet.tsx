@@ -45,6 +45,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 	const [text, setText] = useState('')
 	const [optional, setOptional] = useState<IOptional>({})
 	const [vis, setVis] = useState<'public' | 'unlisted' | 'private' | 'direct' | 'local'>('public')
+	const [quoteApproval, setQuoteApproval] = useState<'public' | 'followers' | 'nobody'>('public')
 	const colorScheme = useColorScheme()
 	const isDark = colorScheme === 'dark'
 	const textColor = PlatformColor('label')
@@ -115,6 +116,9 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 		const { data: acctInfo } = await client.verifyAccountCredentials()
 		const priv = acctInfo.source?.privacy
 		if (['public', 'unlisted', 'private', 'direct'].includes(priv || '')) setVis((priv as any) || 'public')
+		const quotePolicy = acctInfo.source?.quote_policy
+		if (['public', 'followers', 'nobody'].includes(quotePolicy || '')) setQuoteApproval((quotePolicy as any) || 'public')
+		
 	}
 	useEffect(() => {
 		const fn = async () => {
@@ -231,7 +235,7 @@ export default function ComposeSheet({ isOpened, close, open, composeAction, cle
 			)}
 			{mode === 'menu' && (
 				<TransView>
-					<Menu inSheet={true} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />
+					<Menu inSheet={true} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} quoteApprovalState={{ quoteApproval, setQuoteApproval }} />
 				</TransView>
 			)}
 			{mode === 'schedule' && (

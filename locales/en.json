@@ -223,6 +223,12 @@
             "close": "Close"
         },
         "menu": {
+            "quoteApproval": {
+                "label": "Who can quote this post?",
+                "public": "Anyone",
+                "followers": "Followers",
+                "nobody": "Nobody"
+            },
             "poll": "Create Poll",
             "schedule": "Scheduled Post",
             "return": "Return to Composer"

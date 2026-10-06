@@ -81,6 +81,7 @@ export default function Post() {
 	const [cw, setCW] = useState('')
 	const [uploaded, setUploaded] = useState<Array<Entity.Attachment | Entity.AsyncAttachment>>([])
 	const [vis, setVis] = useState<NonNullable<ActionProps['visibility']>>('public')
+	const [quoteApproval, setQuoteApproval] = useState<'public' | 'followers' | 'nobody'>('public')
 	const [optional, setOptional] = useState<PostOptions>({})
 	const [maxChars, setMaxChars] = useState(500)
 	const [maxPollsOptions, setMaxPollsOptions] = useState(4)
@@ -161,6 +162,8 @@ export default function Post() {
 				setMaxPollsOptions(instance.data.configuration.polls?.max_options || 4)
 				const privacy = credentials.data.source?.privacy
 				if (!visibility && type !== 'edit' && (privacy === 'public' || privacy === 'unlisted' || privacy === 'private' || privacy === 'direct')) setVis(privacy)
+				const quotePolicy = credentials.data.source?.quote_policy
+				if (['public', 'followers', 'nobody'].includes(quotePolicy || '')) setQuoteApproval((quotePolicy as any) || 'public')
 			} catch (error) {
 				if (!cancelled) Alert.alert(t('screen.post'), String(error))
 			} finally {
@@ -284,7 +287,7 @@ export default function Post() {
 			)}
 			{sheet === 'menu' && (
 				<ModeSheet close={() => closeSheet('menu')} scrollable={false}>
-					<Menu inSheet={false} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} />
+					<Menu inSheet={false} client={client} npSet={{ setText, setUploaded }} changeMode={changeMode} quoteApprovalState={{ quoteApproval, setQuoteApproval }} />
 				</ModeSheet>
 			)}
 			{sheet === 'poll' && (
