@@ -158,6 +158,11 @@
 			"showNotifications": "通知を表示",
 			"unread": "{{count}} 件の未読通知 (クリックして既読にする)"
 		},
+		"reaction": {
+			"loadError": "絵文字を読み込めませんでした。",
+			"submitError": "リアクションを追加できませんでした。もう一度お試しください。",
+			"retry": "再試行"
+		},
 		"actions": {
 			"reply": "返信",
 			"reblog": "ブースト",

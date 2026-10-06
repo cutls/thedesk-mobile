@@ -1,4 +1,5 @@
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
+import { useRecyclingState } from '@shopify/flash-list'
 import { ja } from 'date-fns/locale'
 import { Image } from 'expo-image'
 import { SymbolView } from 'expo-symbols'
@@ -26,6 +27,7 @@ import { Card } from './Card'
 import { RenderHTML } from './HTML'
 import { Poll } from './Poll'
 import { Quote } from './Quote'
+import EmojiReactionSheet from './EmojiReactionSheet'
 
 type IConfig = Settings['timeline']
 interface IProps {
@@ -74,6 +76,7 @@ export const Status = (props: IProps) => {
 	const actionColor = isDark ? PlatformColor('systemGray2') : PlatformColor('systemGray')
 	const styles = createStyles({ width: columnWidth })
 	const [isOpen, setIsOpen] = useState(false)
+	const [isReactionOpen, setIsReactionOpen] = useRecyclingState(false, [acct.id, status.id])
 	const locale = lang === 'ja' ? ja : undefined
 	const fromNow = calcFromNow(new Date(status.created_at), lang === 'ja')
 	const basic = status.account
@@ -238,9 +241,9 @@ export const Status = (props: IProps) => {
 					{status.card && <Card card={status.card} columnWidth={columnWidth - left} />}
 					<Attachment attachments={status.media_attachments} width={columnWidth - left} isSensitive={status.sensitive} config={props.config} />
 					{status.poll || status.quote_status || status.card || status.media_attachments.length > 0 ? <View style={{ height: 10 }} /> : null}
-					{!!status.emoji_reactions?.length && (
+					{(acct.emojiReactions || !!status.emoji_reactions?.length) && (
 						<View style={[styles.reactions, { width: columnWidth - left }]}>
-							{status.emoji_reactions.map((reaction) => {
+							{status.emoji_reactions?.map((reaction) => {
 								const imageUrl = showGif ? reaction.url || reaction.static_url : reaction.static_url || reaction.url
 								return (
 									<View key={reaction.name} style={styles.reaction} accessible accessibilityLabel={`${reaction.name}: ${reaction.count.toLocaleString()}`}>
@@ -253,6 +256,11 @@ export const Status = (props: IProps) => {
 									</View>
 								)
 							})}
+							{acct.emojiReactions && (
+								<TouchableOpacity style={styles.reaction} accessibilityRole="button" accessibilityLabel={t('timeline.actions.emojiReaction')} onPress={() => setIsReactionOpen(true)}>
+									<SymbolView name="face.smiling" type="monochrome" tintColor={actionColor} size={20 * fontScale} />
+								</TouchableOpacity>
+							)}
 						</View>
 					)}
 					<View style={{ display: 'flex', flexDirection: 'row', marginBottom: 10, paddingHorizontal: 10, justifyContent: 'space-between', width: columnWidth - left }}>
@@ -287,6 +295,9 @@ export const Status = (props: IProps) => {
 					</View>
 				</View>
 			</View>
+			{acct.emojiReactions && isReactionOpen && (
+				<EmojiReactionSheet key={`${acct.id}:${status.id}`} client={client} statusId={status.id} showGif={showGif} updateStatus={updateStatus} close={() => setIsReactionOpen(false)} />
+			)}
 		</View>
 	)
 }

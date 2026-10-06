@@ -107,6 +107,11 @@
 			"showNotifications": "Show Notifications",
 			"unread": "{count} unread notifications (Click to mark as read)"
 		},
+		"reaction": {
+			"loadError": "Could not load emoji.",
+			"submitError": "Could not add the reaction. Please try again.",
+			"retry": "Try again"
+		},
 		"actions": {
 			"reply": "Reply",
 			"reblog": "Boost",
