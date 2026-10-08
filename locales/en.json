@@ -114,8 +114,9 @@
 		},
 		"reaction": {
 			"nativeEmoji": "Standard emoji",
-			"emojiPlaceholder": "Enter an emoji",
-			"singleEmojiHint": "Enter exactly one emoji to react. Text conversion is supported.",
+			"customEmoji": "Custom emoji",
+			"emojiPlaceholder": "Enter emoji or search",
+			"singleEmojiHint": "Enter exactly one emoji to react. You can also search custom emoji.",
 			"add": "React",
 			"loadError": "Could not load emoji.",
 			"submitError": "Could not add the reaction. Please try again.",
@@ -227,6 +228,7 @@
             "direct": "Direct"
         },
         "emoji": {
+            "search": "Search custom emoji",
             "recent": "Recently used",
             "empty": "No emoji",
             "close": "Close"

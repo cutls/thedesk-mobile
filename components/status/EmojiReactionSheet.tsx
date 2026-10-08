@@ -7,7 +7,7 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from '@gorhom/b
 import { GlassView } from 'expo-glass-effect'
 import * as Haptics from 'expo-haptics'
 import { Image } from 'expo-image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Modal, Platform, PlatformColor, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -22,6 +22,7 @@ export interface EmojiReactionSheetProps {
 	updateStatus: (status: Entity.Status) => void
 	close: () => void
 }
+const contentPadding = 20
 const GlassViewCustom = (props: React.ComponentProps<typeof GlassView>) => <GlassView {...props} style={[props.style, { borderRadius: 20, marginBottom: 5 }]} />
 export default function EmojiReactionSheet({ acctId, client, statusId, showGif, updateStatus, close }: EmojiReactionSheetProps) {
 	const { width, deviceWidth } = useWindowSize()
@@ -36,9 +37,18 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 	const [attempt, setAttempt] = useState(0)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [emojiInput, setEmojiInput] = useState('')
-	const canSubmitEmoji = isSingleEmoji(emojiInput) && !isSubmitting
-	const columns = Math.max(1, Math.min(8, Math.floor((width - 40) / 44)))
-	const cellSize = (width - 40) / columns
+	const isNativeEmoji = isSingleEmoji(emojiInput)
+	const canSubmitEmoji = isNativeEmoji && !isSubmitting
+	const searchQuery = isNativeEmoji
+		? ''
+		: emojiInput
+				.trim()
+				.replace(/^:+|:+$/g, '')
+				.toLowerCase()
+	const filteredEmojis = useMemo(() => emojis.filter((emoji) => emoji.shortcode.toLowerCase().includes(searchQuery)), [emojis, searchQuery])
+	const contentWidth = width - contentPadding * 2
+	const columns = Math.max(1, Math.min(8, Math.floor(contentWidth / 44)))
+	const cellSize = contentWidth / columns
 
 	useEffect(() => {
 		let active = true
@@ -152,15 +162,16 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 								</View>
 								<Text style={styles.hint}>{t('timeline.reaction.singleEmojiHint')}</Text>
 							</View>
+							<Text style={{ marginLeft: 20 }}>{t('timeline.reaction.customEmoji')}</Text>
 							<BottomSheetFlatList
 								key={columns}
-								data={isLoading || hasError ? [] : emojis}
+								data={isLoading || hasError ? [] : filteredEmojis}
 								numColumns={columns}
 								keyboardShouldPersistTaps="handled"
 								keyboardDismissMode="on-drag"
 								keyExtractor={(item: Entity.Emoji) => item.shortcode}
-								contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: 20, paddingBottom: insets.bottom + 20 }}
-								style={{ backgroundColor: 'transparent', padding: 10, zIndex: 5 }}
+								contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: contentPadding, paddingTop: 10, paddingBottom: insets.bottom + 20 }}
+								style={{ backgroundColor: 'transparent', zIndex: 5 }}
 								ListEmptyComponent={
 									<View style={styles.empty}>
 										{isLoading ? (
@@ -177,7 +188,7 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 										)}
 									</View>
 								}
-								ListHeaderComponent={!isLoading && !hasError ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
+								ListHeaderComponent={!isLoading && !hasError && !searchQuery ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
 								renderItem={({ item }: { item: Entity.Emoji }) => renderEmoji(item)}
 							/>
 						</BottomSheet>
@@ -190,7 +201,7 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 
 const styles = StyleSheet.create({
 	root: { flex: 1 },
-	nativeEmoji: { paddingHorizontal: 20, paddingBottom: 12, gap: 6 },
+	nativeEmoji: { paddingHorizontal: contentPadding, paddingBottom: 12, gap: 6 },
 	inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 	input: {
 		flex: 1,
@@ -206,7 +217,7 @@ const styles = StyleSheet.create({
 	hint: { fontSize: 12, color: PlatformColor('secondaryLabel') },
 	background: { backgroundColor: 'transparent' },
 	handle: { backgroundColor: PlatformColor('secondaryLabel') },
-	header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, gap: 10 },
+	header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: contentPadding, gap: 10 },
 	title: { flex: 1, fontSize: 18, fontWeight: 'bold' },
 	close: { padding: 12, minHeight: 44, justifyContent: 'center' },
 	empty: { paddingVertical: 40, alignItems: 'center', gap: 12 },

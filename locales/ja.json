@@ -67,6 +67,7 @@
 			"direct": "ダイレクト"
 		},
 		"emoji": {
+			"search": "カスタム絵文字を検索",
 			"recent": "最近使った絵文字",
 			"empty": "絵文字がありません",
 			"close": "閉じる"
@@ -172,8 +173,9 @@
 		},
 		"reaction": {
 			"nativeEmoji": "標準の絵文字",
-			"emojiPlaceholder": "絵文字を入力",
-			"singleEmojiHint": "絵文字を1つ入力してください。文字からの変換も利用できます。",
+			"customEmoji": "カスタム絵文字",
+			"emojiPlaceholder": "絵文字を入力・検索",
+			"singleEmojiHint": "絵文字を1つ入力してください。カスタム絵文字の検索もできます。",
 			"add": "リアクション",
 			"loadError": "絵文字を読み込めませんでした。",
 			"submitError": "リアクションを追加できませんでした。もう一度お試しください。",
