@@ -56,3 +56,5 @@ prompt.txt
 prompt.md
 thirdparty.js
 thirdparty.txt
+
+*.sh

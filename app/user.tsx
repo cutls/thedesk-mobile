@@ -13,14 +13,15 @@ import { RequestingRequested } from '@/components/relations/RequestingRequested'
 import RelationSheet from '@/components/RelationSheet'
 import { AccountName } from '@/components/status/AccountName'
 import { Text } from '@/components/themed/Text'
-import { Button, CustomButton, IconButton } from '@/components/ui/Button'
+import { CustomButton, IconButton } from '@/components/ui/Button'
 import type { Account } from '@/entities/account'
 import { useWindowSize } from '@/hooks/useWindowSize'
+import { shouldUseWhiteText } from '@/utils/blurhash'
 import { getAcctById } from '@/utils/storage'
 import { calcFromNow } from '@/utils/timeline'
 import generator, { type Entity, type MegalodonInterface } from '@cutls/megalodon'
 import { Host, Picker, Text as SwiftUIText } from '@expo/ui/swift-ui'
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
+import { padding as paddingMods, pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { BlurView } from 'expo-blur'
 import { GlassView } from 'expo-glass-effect'
 import * as Haptics from 'expo-haptics'
@@ -32,7 +33,7 @@ import { SymbolView } from 'expo-symbols'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, type OpaqueColorValue, PlatformColor, type ScrollViewInstance, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native'
-import Animated, { useAnimatedProps, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
+import Animated, { Extrapolation, interpolate, useAnimatedProps, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const AnimatedImage = Animated.createAnimatedComponent(Image)
@@ -79,10 +80,10 @@ export default function Index() {
 		height: Math.max(340, 300 - Math.min(0, scrollY.value))
 	}))
 	const compactHeaderStyle = useAnimatedStyle(() => ({
-		opacity: scrollY.value > 300 ? 1 : 0
+		opacity: interpolate(scrollY.value, [200, 300], [0, 1], Extrapolation.CLAMP)
 	}))
 	const compactHeaderBlurProps = useAnimatedProps(() => ({
-		intensity: scrollY.value > 300 ? 100 : 0
+		intensity: interpolate(scrollY.value, [200, 300], [0, 100], Extrapolation.CLAMP)
 	}))
 
 	const router = useRouter()
@@ -101,11 +102,14 @@ export default function Index() {
 	const [basic, setBasic] = useState<Entity.Account | null>(null)
 	const [relation, setRelation] = useState<Entity.Relationship | null>(null)
 	const [rSheet, setRSheet] = useState(false)
+	const [isHeaderTxtWhite, setIsHeaderTxtWhite] = useState(false)
 	const ref = useRef<ScrollViewInstance>(null)
 	const [page, setPage] = useState(0)
 	const verifiedBg = isDark ? '#083416' : '#d2e2d7'
 	const lang = Localization.getLocales()[0]?.languageTag === 'ja-JP' ? 'ja' : 'en'
 	const options = [t('user.posts'), t('user.follows'), t('user.followers')]
+	const headerTxtColor = isHeaderTxtWhite ? '#fff' : '#000'
+	const headerTxtColorCSS = { color: headerTxtColor }
 	const updateRelation = async () => {
 		if (!client) return
 		const r = await client.getRelationship(userId)
@@ -126,7 +130,13 @@ export default function Index() {
 				if (d.data.acct === acct.username) return
 				const r = await client.getRelationship(userId)
 				setRelation(r.data)
-			} finally {
+				const useHeader = d.data.header_static || d.data.header
+				await Image.prefetch(useHeader)
+				setIsLoading(false)
+				const isMissing = useHeader.includes('missing.png')
+				const blurhash = isMissing ? '' : await Image.generateBlurhashAsync(useHeader, [4, 3])
+				setIsHeaderTxtWhite(blurhash ? shouldUseWhiteText(blurhash || '') : false)
+			} catch (e) {
 				setIsLoading(false)
 			}
 		}
@@ -156,9 +166,12 @@ export default function Index() {
 				>
 					<IconButton onPress={() => router.back()} style={{ width: 45, height: 45 }} systemImage="chevron.left" width={45} isDark={isDark} />
 					<Animated.View style={compactHeaderStyle}>
-						<Button onPress={() => ref.current?.scrollTo({ y: 0 })} style={{ width: 200, height: 45, padding: 10 }} width={200} isDark={isDark}>
-							{basic.acct}
-						</Button>
+						<TouchableOpacity onPress={() => ref.current?.scrollTo({ y: 0 })} style={{ height: 45, padding: 10, paddingTop: 15, width: deviceWidth - 120, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+							<Avatar src={basic.avatar} size={30} />
+							<Text style={{ color: headerTxtColor, fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginLeft: 5 }} numberOfLines={1}>
+								{basic.acct}
+							</Text>
+						</TouchableOpacity>
 					</Animated.View>
 					{relation && (
 						<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -169,7 +182,7 @@ export default function Index() {
 					)}
 				</View>
 				<AnimatedImage style={[{ height: 120, width }, compactHeaderStyle]} source={{ uri: basic.header }} />
-				<AnimatedBlurView animatedProps={compactHeaderBlurProps} style={{ position: 'absolute', height: 120, width }} />
+				<AnimatedBlurView animatedProps={compactHeaderBlurProps} style={{ position: 'absolute', height: 130, width }} />
 			</View>
 			<AnimatedImage style={[styles.header, { marginLeft: padding }, headerStyle]} source={{ uri: basic.header }} />
 			<Animated.ScrollView ref={ref} onScroll={onScroll} scrollEventThrottle={16} style={{ position: 'absolute', width, top: 0, left: padding, right: 0, bottom: 0 }}>
@@ -184,36 +197,36 @@ export default function Index() {
 						)}
 					</View>
 					<View style={{ marginLeft: 5 }}>
-						<AccountName account={basic} fontSize={24} width={width - 145} />
+						<AccountName account={basic} fontSize={24} width={width - 145} color={headerTxtColor} />
 						<TouchableOpacity style={{ display: 'flex', flexDirection: 'row', marginVertical: 5 }} onPress={() => Linking.openURL(basic.url)}>
-							<Text style={{}}>@{basic.acct}</Text>
-							{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={textColor} size={16} />}
+							<Text style={headerTxtColorCSS}>@{basic.acct}</Text>
+							{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={headerTxtColor} size={16} />}
 						</TouchableOpacity>
-						<Text style={{ marginBottom: 5, fontSize: 12 }} numberOfLines={1}>
+						<Text style={{ marginBottom: 5, fontSize: 12, color: headerTxtColor }} numberOfLines={1}>
 							{t('user.joinedAt', { absolute: new Date(basic.created_at).toLocaleDateString(), relative: calcFromNow(new Date(basic.created_at), lang === 'ja') })}
 						</Text>
 						<View style={{ display: 'flex', flexDirection: 'row' }}>
 							<View style={{ width: (width - 145) / 3 }}>
-								<Text numberOfLines={1} style={{ textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ textAlign: 'center', color: headerTxtColor }}>
 									{t('user.posts')}
 								</Text>
-								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center', color: headerTxtColor }}>
 									{basic.statuses_count.toLocaleString()}
 								</Text>
 							</View>
 							<View style={{ width: (width - 145) / 3 }}>
-								<Text numberOfLines={1} style={{ textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ textAlign: 'center', color: headerTxtColor }}>
 									{t('user.follows')}
 								</Text>
-								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center', color: headerTxtColor }}>
 									{basic.following_count.toLocaleString()}
 								</Text>
 							</View>
 							<View style={{ width: (width - 145) / 3 }}>
-								<Text numberOfLines={1} style={{ textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ textAlign: 'center', color: headerTxtColor }}>
 									{t('user.followers')}
 								</Text>
-								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center' }}>
+								<Text numberOfLines={1} style={{ fontWeight: 'bold', textAlign: 'center', color: headerTxtColor }}>
 									{basic.followers_count.toLocaleString()}
 								</Text>
 							</View>
@@ -246,7 +259,7 @@ export default function Index() {
 				</View>
 				<Host style={{ height: 50, backgroundColor: isDark ? '#111' : '#fff' }}>
 					<Picker
-						modifiers={[pickerStyle('segmented')]}
+						modifiers={[pickerStyle('segmented'), paddingMods({ horizontal: 10 })]}
 						label="Post, Follows, Followers"
 						selection={page}
 						onSelectionChange={(selection) => {

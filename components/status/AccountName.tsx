@@ -14,13 +14,14 @@ interface FromTootToAcctName {
 	fontSize?: number
 	showWithoutEllipsis?: boolean
 	width: number
+	color?: string
 }
 export const AccountName = React.memo((props: FromTootToAcctName) => {
 	const { account, showWithoutEllipsis, width, fontSize = 20 } = props
 	const textProps = showWithoutEllipsis ? {} : { numberOfLines: 1 }
 	const theme = useColorScheme()
 	const isDark = theme === 'dark'
-	const txtColor = isDark ? 'white' : 'black'
+	const txtColor = props.color || (isDark ? 'white' : 'black')
 	const tagStyle = { a: { color: PlatformColor('link') }, p: { color: txtColor } } as const
 	const showGif = true
 	return account.display_name ? (
