@@ -1,4 +1,6 @@
 import { EmojiHistory } from '@/components/EmojiHistory'
+import { EmojiCategoryRow } from '@/components/EmojiCategoryRow'
+import { buildEmojiCategoryItems } from '@/utils/emojiCategories'
 import { useEmojiHistory } from '@/hooks/useEmojiHistory'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import type { Entity, MegalodonInterface } from '@cutls/megalodon'
@@ -33,6 +35,7 @@ export default function Emoji({ client, acctId, add }: Props) {
 		.replace(/^:+|:+$/g, '')
 		.toLowerCase()
 	const filteredEmoji = useMemo(() => emoji.filter((item) => item.shortcode.toLowerCase().includes(searchQuery)), [emoji, searchQuery])
+	const categoryItems = useMemo(() => buildEmojiCategoryItems(filteredEmoji, column), [filteredEmoji])
 	const { recentEmojis, recordEmoji } = useEmojiHistory(acctId, emoji)
 	useEffect(() => {
 		let active = true
@@ -89,18 +92,18 @@ export default function Emoji({ client, acctId, add }: Props) {
 				</View>
 			) : (
 				<FlashList
-					data={filteredEmoji}
-					numColumns={column}
+					data={categoryItems}
+					getItemType={(item) => item.type}
 					keyboardShouldPersistTaps="handled"
 					keyboardDismissMode="on-drag"
-					keyExtractor={(item) => item.shortcode}
+					keyExtractor={(item) => item.key}
 					ListEmptyComponent={
 						<View style={styles.container}>
 							<Text>{t('composer.emoji.empty')}</Text>
 						</View>
 					}
 					ListHeaderComponent={!searchQuery ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
-					renderItem={({ item }) => renderEmoji(item)}
+					renderItem={({ item }) => <EmojiCategoryRow item={item} renderEmoji={renderEmoji} />}
 					style={{ height: 250 }}
 				/>
 			)}
