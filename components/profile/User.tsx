@@ -23,11 +23,13 @@ export const User = ({ acct, columnWidth, txtColor, basic }: IProps) => {
 							<Avatar src={basic.avatar} size={35} />
 						</View>
 
-						<View style={{ marginLeft: 5 }}>
+						<View style={{ marginLeft: 5, width: columnWidth - 100 }}>
 							<AccountName account={basic} fontSize={16} width={columnWidth - 100} />
 							<View style={{ display: 'flex', flexDirection: 'row', marginVertical: 2, alignItems: 'center' }}>
-								<Text style={{}}>@{basic.acct}</Text>
-								{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={txtColor} size={12} />}
+								<Text numberOfLines={1} ellipsizeMode="tail" style={{ flexShrink: 1 }}>
+									@{basic.acct}
+								</Text>
+								{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={txtColor} size={12} style={{ flexShrink: 0 }} />}
 							</View>
 						</View>
 					</View>

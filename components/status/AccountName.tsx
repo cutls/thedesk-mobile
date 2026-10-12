@@ -26,7 +26,7 @@ export const AccountName = React.memo((props: FromTootToAcctName) => {
 	const showGif = true
 	return account.display_name ? (
 		<HTML
-			source={{ html: `${emojify(account.display_name, account.emojis, fontSize * 0.8, showGif)}` }}
+			source={{ html: `${emojify(`${account.display_name}`, account.emojis, fontSize * 0.8, showGif)}` }}
 			tagsStyles={tagStyle}
 			customHTMLElementModels={renderers}
 			contentWidth={width}

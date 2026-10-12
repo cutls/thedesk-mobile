@@ -109,6 +109,7 @@ export default function Index() {
 	const lang = Localization.getLocales()[0]?.languageTag === 'ja-JP' ? 'ja' : 'en'
 	const options = [t('user.posts'), t('user.follows'), t('user.followers')]
 	const headerTxtColor = isHeaderTxtWhite ? '#fff' : '#000'
+	const compactHeaderTxtColor = isDark ? '#fff' : isHeaderTxtWhite ? '#fff' : '#000'
 	const headerTxtColorCSS = { color: headerTxtColor }
 	const updateRelation = async () => {
 		if (!client) return
@@ -127,16 +128,20 @@ export default function Index() {
 				setClient(client)
 				const d = await client.getAccount(userId)
 				setBasic(d.data)
-				if (d.data.acct === acct.username) return
+				if (d.data.acct === acct.username) {
+					setIsLoading(false)
+					return
+				}
 				const r = await client.getRelationship(userId)
 				setRelation(r.data)
 				const useHeader = d.data.header_static || d.data.header
-				await Image.prefetch(useHeader)
+				if (useHeader) await Image.prefetch(useHeader)
 				setIsLoading(false)
 				const isMissing = useHeader.includes('missing.png')
 				const blurhash = isMissing ? '' : await Image.generateBlurhashAsync(useHeader, [4, 3])
 				setIsHeaderTxtWhite(blurhash ? shouldUseWhiteText(blurhash || '') : false)
 			} catch (e) {
+				console.log(e)
 				setIsLoading(false)
 			}
 		}
@@ -166,19 +171,24 @@ export default function Index() {
 				>
 					<IconButton onPress={() => router.back()} style={{ width: 45, height: 45 }} systemImage="chevron.left" width={45} isDark={isDark} />
 					<Animated.View style={compactHeaderStyle}>
-						<TouchableOpacity onPress={() => ref.current?.scrollTo({ y: 0 })} style={{ height: 45, padding: 10, paddingTop: 15, width: deviceWidth - 120, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+						<TouchableOpacity
+							onPress={() => ref.current?.scrollTo({ y: 0 })}
+							style={{ height: 45, padding: 10, paddingTop: 15, width: deviceWidth - 120, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+						>
 							<Avatar src={basic.avatar} size={30} />
-							<Text style={{ color: headerTxtColor, fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginLeft: 5 }} numberOfLines={1}>
+							<Text style={{ color: compactHeaderTxtColor, fontWeight: 'bold', textAlign: 'center', fontSize: 16, marginLeft: 5, flexShrink: 1 }} numberOfLines={1} ellipsizeMode="tail">
 								{basic.acct}
 							</Text>
 						</TouchableOpacity>
 					</Animated.View>
-					{relation && (
+					{relation ? (
 						<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
 							<CustomButton onPress={() => setRSheet(true)} style={{ width: 45, height: 45, marginRight: 2 }}>
 								<BasePerson relation={relation} textColor={textColor} />
 							</CustomButton>
 						</View>
+					) : (
+						<View style={{ width: 45, height: 45 }} />
 					)}
 				</View>
 				<AnimatedImage style={[{ height: 120, width }, compactHeaderStyle]} source={{ uri: basic.header }} />
@@ -196,11 +206,20 @@ export default function Index() {
 							</View>
 						)}
 					</View>
-					<View style={{ marginLeft: 5 }}>
+					<View style={{ marginLeft: 5, width: width - 145 }}>
 						<AccountName account={basic} fontSize={24} width={width - 145} color={headerTxtColor} />
 						<TouchableOpacity style={{ display: 'flex', flexDirection: 'row', marginVertical: 5 }} onPress={() => Linking.openURL(basic.url)}>
-							<Text style={headerTxtColorCSS}>@{basic.acct}</Text>
-							{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={headerTxtColor} size={16} />}
+							<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexShrink: 1 }}>
+								<Text style={headerTxtColorCSS}>@</Text>
+								<Text
+									numberOfLines={1}
+									ellipsizeMode="tail"
+									style={[headerTxtColorCSS, { flexShrink: 1, textDecorationLine: 'underline', textDecorationColor: headerTxtColor, textDecorationStyle: 'dotted' }]}
+								>
+									{basic.acct}
+								</Text>
+							</View>
+							{basic.locked && <SymbolView name="lock" type="monochrome" tintColor={headerTxtColor} size={16} style={{ flexShrink: 0 }} />}
 						</TouchableOpacity>
 						<Text style={{ marginBottom: 5, fontSize: 12, color: headerTxtColor }} numberOfLines={1}>
 							{t('user.joinedAt', { absolute: new Date(basic.created_at).toLocaleDateString(), relative: calcFromNow(new Date(basic.created_at), lang === 'ja') })}
