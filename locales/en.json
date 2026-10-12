@@ -228,6 +228,7 @@
             "direct": "Direct"
         },
         "emoji": {
+            "uncategorized": "Uncategorized",
             "search": "Search custom emoji",
             "recent": "Recently used",
             "empty": "No emoji",

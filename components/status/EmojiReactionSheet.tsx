@@ -1,4 +1,6 @@
 import { EmojiHistory } from '@/components/EmojiHistory'
+import { EmojiCategoryRow } from '@/components/EmojiCategoryRow'
+import { buildEmojiCategoryItems, type EmojiCategoryItem } from '@/utils/emojiCategories'
 import { useEmojiHistory } from '@/hooks/useEmojiHistory'
 import { useWindowSize } from '@/hooks/useWindowSize'
 import { isSingleEmoji } from '@/utils/isSingleEmoji'
@@ -49,6 +51,7 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 	const contentWidth = width - contentPadding * 2
 	const columns = Math.max(1, Math.min(8, Math.floor(contentWidth / 44)))
 	const cellSize = contentWidth / columns
+	const categoryItems = useMemo(() => buildEmojiCategoryItems(filteredEmojis, columns), [filteredEmojis, columns])
 
 	useEffect(() => {
 		let active = true
@@ -165,11 +168,10 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 							<Text style={{ marginLeft: 20 }}>{t('timeline.reaction.customEmoji')}</Text>
 							<BottomSheetFlatList
 								key={columns}
-								data={isLoading || hasError ? [] : filteredEmojis}
-								numColumns={columns}
+								data={isLoading || hasError ? [] : categoryItems}
 								keyboardShouldPersistTaps="handled"
 								keyboardDismissMode="on-drag"
-								keyExtractor={(item: Entity.Emoji) => item.shortcode}
+								keyExtractor={(item: EmojiCategoryItem) => item.key}
 								contentContainerStyle={{ backgroundColor: 'transparent', paddingHorizontal: contentPadding, paddingTop: 10, paddingBottom: insets.bottom + 20 }}
 								style={{ backgroundColor: 'transparent', zIndex: 5 }}
 								ListEmptyComponent={
@@ -189,7 +191,7 @@ export default function EmojiReactionSheet({ acctId, client, statusId, showGif, 
 									</View>
 								}
 								ListHeaderComponent={!isLoading && !hasError && !searchQuery ? <EmojiHistory emojis={recentEmojis} renderEmoji={renderEmoji} /> : undefined}
-								renderItem={({ item }: { item: Entity.Emoji }) => renderEmoji(item)}
+								renderItem={({ item }: { item: EmojiCategoryItem }) => <EmojiCategoryRow item={item} renderEmoji={renderEmoji} />}
 							/>
 						</BottomSheet>
 					</View>
